@@ -7,7 +7,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = {"spec-plan", "spec-apply", "spec-close"}
+SKILLS = {"spec-plan", "spec-apply", "spec-close", "spec-feedback"}
 
 
 class InstallationTests(unittest.TestCase):

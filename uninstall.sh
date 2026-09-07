@@ -105,7 +105,7 @@ fi
 if [ ! -d "$SRC_DIR" ]; then
   echo -e "${RED}Error: Source skills directory not found at: $SRC_DIR${NC}" >&2
   echo "Using default list of skills to uninstall..."
-  SKILLS=("spec-plan" "spec-apply" "spec-close")
+  SKILLS=("spec-plan" "spec-apply" "spec-close" "spec-feedback")
 else
   # Find all skill folders
   SKILLS=()

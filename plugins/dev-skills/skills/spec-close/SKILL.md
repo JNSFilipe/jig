@@ -34,6 +34,8 @@ After verification, update only the affected baseline specs, normally `docs/spec
 
 ## Archive and report
 
+When available, use `spec-feedback` to report verified outcomes and limitations, linking the final record location and affected specs. It adds no step or report file.
+
 Record final evidence and mark the record complete only after verification and spec reconciliation succeed. Move it to `docs/changes/archive/YYYY-MM-DD-<name>.md`, or the project's existing archive convention. Preserve its contents and working links. If the destination exists, use a distinct suffix; never overwrite history.
 
 Keep reconciliation and archiving together as one local closeout operation; no Git commit or external tracker is needed. If interrupted after merging specs, resume by inspecting current state and applying only the remaining edits. Do not duplicate requirements or mark failed closeout complete.

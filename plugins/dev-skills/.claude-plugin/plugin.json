@@ -1,7 +1,7 @@
 {
   "name": "dev-skills",
-  "version": "1.1.0",
-  "description": "Three file-based coding skills for Codex and Claude Code: plan, apply, and close verified changes",
+  "version": "1.2.0",
+  "description": "File-based coding workflow for Codex and Claude Code: plan, apply, close, and evidence-based feedback",
   "author": {
     "name": "JNSFilipe",
     "url": "https://github.com/JNSFilipe"

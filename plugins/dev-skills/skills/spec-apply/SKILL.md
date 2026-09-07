@@ -33,6 +33,8 @@ Update the record when implementation teaches you something. Revise routine desi
 
 ## Finish or leave a resumable state
 
+When available, use `spec-feedback` for progress updates, blockers, and handoffs, drawing on this record and actual check results. It adds no step or report file.
+
 After implementation, use `spec-close` if available: verify behavior against code, reconcile baseline specs, and archive the completed record. If unavailable, perform those steps directly, merging only verified requirement changes into their named specs before moving the record to `docs/changes/archive/YYYY-MM-DD-<name>.md`. Re-read baseline specs before merging; preserve unrelated requirements and resolve overlapping edits. Never overwrite an archive entry. Do not archive with failing or missing required checks, unresolved tasks, or conflicting specs.
 
 Respect a request to stop before closeout or to implement only a particular slice. On a blocker or partial stop, leave the record active with actual progress, failed/unrun checks, and a precise next action. Keep task tracking in that local file. Report what works and what remains. Local completion describes the current project files; it does not imply deployment or permission to publish or merge.

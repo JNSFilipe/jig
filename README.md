@@ -1,12 +1,12 @@
 # Lean coding skills for Codex and Claude Code
 
-A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/): capture intent, build in verified slices, and keep the spec accurate. Three skills, one active change file. All task tracking lives in local Markdown; Git and external services are optional.
+A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/): capture intent, build in verified slices, and keep the spec accurate. Three workflow actions, one supporting feedback skill, one active change file. All task tracking lives in local Markdown; Git and external services are optional.
 
 **Start with `spec-apply` and a concrete request.** It plans only as much as needed, implements, verifies, and closes the change. Use `spec-plan` separately when you want to review the approach before coding.
 
 ## Quick start
 
-Install the three skills into a project for both tools:
+Install the three workflow skills and `spec-feedback` into a project for both tools:
 
 ```bash
 ./install.sh --local /path/to/project
@@ -47,6 +47,23 @@ These are actions you can revisit. You do not have to type all three commands.
 A tiny fix can go straight to editing and an appropriate check, with no new record. An existing spec still gets corrected if its contract changes. Add a separate design document only when technical decisions or migration details need the space. When you request test-first development, the same implementation skill runs a red-green-refactor loop, one behavior at a time.
 
 Completion means verified in the current project files. Committing, pushing, merging, and deploying follow the user's separate request and project rules.
+
+## Feedback grounded in the project
+
+[spec-feedback](skills/spec-feedback/SKILL.md) supports all three actions when explaining progress, requesting a decision, or handing work over. You do not need to invoke another step. For a standalone status request, use `$spec-feedback Summarize docs/changes/add-order-export.md` in Codex or `/spec-feedback Summarize docs/changes/add-order-export.md` in Claude Code; plugin installs use `/dev-skills:spec-feedback`.
+
+It follows the existing document tree to find support for each claim:
+
+| Question | Source |
+| --- | --- |
+| What are we trying to achieve? | The selected change's scope and behavior |
+| What is done, blocked, or next? | Its tasks, evidence, and next action |
+| What behavior is already specified? | The linked capability spec |
+| What has actually been verified? | Relevant code/tests and current check results |
+| Why was this choice made? | The approach or linked design document |
+| What did completed work deliver? | That change's archive record |
+
+The skill preserves the original's useful rules: ask about concrete behavior, put evidence inside the claim, show observed output before explaining it, and explain the consequences of options. These rules also apply to questions left in plans or handoffs. It distinguishes planned behavior from observed behavior, follows only relevant links, and produces no extra status document. A status-only request leaves the project files unchanged. Git and issue trackers remain unnecessary.
 
 ## No initialization step
 
@@ -139,7 +156,7 @@ Our deliberate simplifications are one normal change file, three entry points, i
 
 ## Keeping the workflow lean
 
-- Keep just the three workflow skills. Load each skill body and its references only when needed.
+- Keep three workflow actions and one supporting feedback skill. Load each skill body and its references only when needed.
 - Read the selected change, affected specs, and relevant code; search before reading whole directories. Load supporting references only when needed.
 - Keep one source for each fact: intended change in the active record, current contract in baseline specs, implementation in code.
 - Record decisions and short verification results, not transcripts or full test logs. Reuse valid evidence; rerun it after relevant changes.
@@ -172,13 +189,13 @@ Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#w
 
 Copy mode is the default and includes supporting references. Rerun installation after updating this checkout. Symlink mode requires the checkout to remain at the same path; use copy mode for a portable project. Restart the agent if newly installed skills do not appear.
 
-Installation replaces destination folders with matching workflow skill names, so preserve local edits before reinstalling. Unrelated skill names are untouched. The former optional skills have been removed from this collection. Previously installed standalone copies remain until you remove those copies; reinstalling updates only the three workflow skills. With no scope argument, the scripts offer an interactive local/global choice.
+Installation replaces destination folders with matching workflow skill names, so preserve local edits before reinstalling. Unrelated skill names are untouched. The unrelated skills have been removed; `spec-feedback` is retained in a focused form. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the four included skills. With no scope argument, the scripts offer an interactive local/global choice.
 
 Earlier versions incorrectly installed global Codex skills under `~/.gemini/config/skills/`. Reinstall to the corrected path. The scripts leave that legacy location untouched; remove only the old copies you recognize if they are no longer needed.
 
 ### Claude Code marketplace alternative
 
-The `dev-skills` plugin contains the same three workflow skills:
+The `dev-skills` plugin contains the same three workflow skills and `spec-feedback`:
 
 ```text
 /plugin marketplace add JNSFilipe/skills
@@ -195,7 +212,7 @@ Use `/dev-skills:spec-apply`, `/dev-skills:spec-plan`, and `/dev-skills:spec-clo
 ./uninstall.sh --global
 ```
 
-Uninstallation removes the three workflow skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
+Uninstallation removes the four included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
 
 ## Maintaining this repository
 

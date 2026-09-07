@@ -35,6 +35,8 @@ Add a separate design document only when alternatives, migration, or cross-syste
 
 ## Hand off
 
+When available, use `spec-feedback` to ground decision requests and the plan handoff in this record and its linked constraints. It adds no step or approval gate.
+
 Check that the scenarios can distinguish correct from incorrect behavior and that tasks cover them. Leave unresolved consequential decisions visibly blocked; do not hide them in an executable plan.
 
 Link the record and summarize the intended behavior and any decision needed. If the request includes implementation, continue into it using the record; the file's existence is not a new approval gate. For a planning-only request, stop here.
