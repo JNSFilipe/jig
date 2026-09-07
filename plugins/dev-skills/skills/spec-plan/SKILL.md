@@ -1,42 +1,51 @@
 ---
 name: spec-plan
-description: Write or refine a small, testable change plan before coding when the user asks to plan a feature, behavior change, or substantial refactor. Use an existing change record when supplied.
+description: Plan or refine a feature, behavior change, or substantial refactor before coding. Use when the user asks for a change plan, design approach, or an executable plan for another agent.
 ---
 
 # Plan a change
 
-Leave enough intent on disk for another session or coding agent to implement the change without reconstructing the conversation. This skill plans; it does not implement unless the user also requested implementation.
+Leave enough intent on disk for another agent to implement without reconstructing the conversation.
 
-## Find the smallest useful scope
+## Rules
 
-Read repository instructions, the relevant code and tests, and any existing plan or specs for the affected behavior. Search first; do not survey the whole repository. Reuse decisions already made in the conversation.
+- **Respect the request.** Planning-only work ends with the plan. A request that also includes implementation can continue without another approval gate.
+- **Keep intent explicit.** Resolve decisions that materially change behavior, compatibility, scope, or cost before treating the plan as executable.
+- **Preserve existing work.** Never overwrite an unrelated change record or replace the project's planning convention.
+- **Use one local task list.** Create workflow files only as needed; Git, a tracker, and an initialization step are unnecessary.
 
-No initialization step is required. Use existing project instructions and build/test configuration when present; otherwise infer only what this change needs. Create the change directory when first writing a record and capability specs at closeout. Do not add workflow configuration, initialize Git for this workflow, or require a tracker to start work.
+## Process
 
-- For a typo, mechanical edit, or obvious localized fix with no design decision, give a short plan in chat. Do not create a change record unless requested. Update an existing spec if the fix changes its contract.
-- For work with meaningful behavior, uncertainty, or multiple steps, use one change record. Split independent outcomes only when they can be delivered separately.
-- Investigate uncertainty in code first. Ask only about decisions that materially change behavior, scope, compatibility, or cost. State reasonable implementation assumptions and proceed. Do not turn planning into a mandatory interview.
+### 1. Establish scope
 
-## Write the record
+Read existing project instructions and the relevant code, tests, and specs. Reuse decisions from the conversation and infer routine implementation choices from the project. Investigate in code before asking the user.
 
-Follow the project's existing planning convention. In an OpenSpec project, use its schema, artifacts, and available workflow; do not introduce a competing directory or feed this skill's compact format to its CLI.
+For an obvious localized fix with no design decision, give a short plan in chat; create a record only if requested. Keep any affected existing spec accurate. For substantive work, identify the smallest useful outcome. Split outcomes only when they can be delivered independently.
 
-Otherwise create `docs/changes/<verb-noun>.md`, or update the explicitly selected active record. Inspect active filenames before choosing a name; never overwrite an unrelated change. Use [the compact template](references/change-template.md) when creating a record. Create directories lazily.
+### 2. Select or create the record
 
-Keep it roughly one screen to one page when the scope allows. Include:
+Use the record named by the user or unambiguously established in context. Ask if several plausible records remain. Inspect active filenames before naming a new record.
 
-- **Why and scope:** the problem, intended outcome, and relevant exclusions.
-- **Behavior:** stable requirement names with concrete input/action/result examples. Identify added, modified, or removed behavior and its target capability spec, normally `docs/specs/<capability>.md`. For modifications, describe the complete resulting requirement, preserving unaffected cases. For removals, state what replaces it or how existing users migrate. A pure refactor records preserved behavior instead of inventing a product change.
-- **Approach:** only decisions that constrain implementation, relevant code/test paths, and necessary compatibility or rollout details. Separate observed facts from assumptions.
-- **Tasks:** a small ordered checklist of verifiable outcomes, each tying behavior to its check. Prefer a working path through the affected layers over separate database/API/UI batches.
-- **Evidence and next step:** checks to run, then their actual results as work proceeds; record any blocker and the exact next action when pausing.
+Follow the project's existing convention. In OpenSpec projects, use the native schema and artifacts; this compact format is not OpenSpec CLI input. Otherwise create `docs/changes/<verb-noun>.md` using [the compact template](references/change-template.md). Keep it roughly one screen to one page when the scope allows.
 
-Add a separate design document only when alternatives, migration, or cross-system interactions need space. Link it instead of repeating it. Track work in the local change record; do not generate tracker issues or a project-wide spec inventory.
+### 3. Describe testable outcomes
 
-## Hand off
+Write:
 
-When available, use `spec-feedback` to ground decision requests and the plan handoff in this record and its linked constraints. It adds no step or approval gate.
+- **Why / scope:** the problem, desired outcome, and relevant exclusions.
+- **Behavior:** named requirements with concrete context/action/result scenarios. Identify Add, Modify, Remove, or Preserve and the target capability spec. A modification describes the full resulting requirement, including unaffected cases; a removal explains replacement or migration. Refactors can preserve the contract.
+- **Approach:** relevant code/test paths, constraining decisions with reasons, and necessary compatibility or rollout details. Distinguish facts from assumptions.
+- **Tasks:** a small ordered checklist of verifiable outcomes and their checks. Prefer a working path through affected layers before extending it.
+- **Evidence / Next:** planned checks, actual results as work proceeds, and the exact next action or blocker.
 
-Check that the scenarios can distinguish correct from incorrect behavior and that tasks cover them. Leave unresolved consequential decisions visibly blocked; do not hide them in an executable plan.
+Add a linked design document only when alternatives, migration, or cross-system interactions need space. Verify that scenarios distinguish correct from incorrect behavior and tasks cover them. Mark consequential unresolved decisions as blocked.
 
-Link the record and summarize the intended behavior and any decision needed. If the request includes implementation, continue into it using the record; the file's existence is not a new approval gate. For a planning-only request, stop here.
+### 4. Checkpoint and hand off
+
+Before leaving substantial planning, preserve decisions that otherwise exist only in chat, file paths, checks, and the first pending action in the record. Checkpoint before a long detour or context reset.
+
+If the host signals context pressure or obsolete decisions repeatedly confuse the task, use an authorized exposed compaction control after checkpointing. Otherwise recommend the host action once with the record path and resume prompt; continue feasible planning. Saving a checkpoint is not proof of a reset.
+
+If `spec-feedback` is installed, read its `SKILL.md` directly for decision and handoff guidance, reusing it if already loaded. Otherwise state intended behavior, outstanding decisions, and the record path.
+
+For planning-only work, stop. When implementation is authorized, continue with `spec-apply` when available, or implement from the record. Leave unresolved product decisions with the planning agent; a cheaper worker needs a settled task.

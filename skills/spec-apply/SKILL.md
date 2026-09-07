@@ -1,40 +1,50 @@
 ---
 name: spec-apply
-description: Implement or resume a planned change in small verified slices. Use when the user asks to build from a spec or change record, or to run the lean spec workflow from a concrete request through completion.
+description: Implement or resume a change from a spec or local plan. Use when the user asks to build a planned feature, continue pending tasks, or run the lean spec workflow through completion.
 ---
 
 # Apply a change
 
-Carry the requested change through implementation and verification. A clear build request authorizes routine planning and local closeout; it does not require the user to invoke each workflow action separately.
+Deliver the requested behavior in verified slices, with a durable record of progress.
 
-## Establish context
+## Rules
 
-Read existing project instructions and inspect relevant files and local edits before changing them. Use version-control status when available; a Git repository is not required. Select the record named by the user or unambiguously established in the conversation. Otherwise list active records (`docs/changes/*.md` by default); infer the target only if it matches the request. Ask when multiple plausible changes remain, rather than picking the newest. Never resume an archived change implicitly.
+- **Evidence determines completion.** Mark tasks complete only after their outcomes and checks pass. Missing dependencies and unavailable services mean unverified.
+- **Preserve intent.** Never weaken a requirement to make a failing test pass. Reconcile behavior changes with the user's direction.
+- **Respect ownership.** An implementation worker handles its assigned scope, returns evidence, and neither redelegates nor archives. The primary agent owns final verification and closeout.
+- **Honor boundaries.** Respect requested models, stopping points, and review-only constraints. Local completion does not authorize publication, merging, or deployment.
+- **Report real transitions.** A checkpoint or model switch does not clear history; claim a context reset only when the host performed it.
 
-Read only the selected record, its linked constraints, relevant baseline specs, and affected code/tests. Use current files as working state; reconcile them with the user's latest instructions. Check completed tasks against the actual code instead of trusting checkboxes or repeating completed work.
+## Process
 
-If no record exists:
+### 1. Select and inspect the work
 
-- Handle a trivial localized change directly and run its appropriate check. No new paperwork is needed; keep any affected existing spec accurate.
-- For a substantive change, use `spec-plan` if available. Otherwise write one `docs/changes/<verb-noun>.md` with purpose/scope, concrete behavior scenarios, approach, a verifiable task checklist, evidence, and next action. Continue when the requested behavior is clear.
+Read project instructions and inspect relevant files and local edits; use version-control status when available. Select the record named by the user or established in context. Otherwise inspect active records, normally `docs/changes/*.md`, and ask if more than one plausibly matches. Resume an archived change only on an explicit request.
 
-If the project already uses OpenSpec or another planning convention, use its existing artifacts and available tooling. Respect its schema; do not create compact records alongside it or invent CLI commands.
+Read the selected record, linked constraints/specs, and affected code/tests. Reconcile the user's latest instructions and check completed tasks against actual files.
 
-## Implement a working slice
+With no record, handle a trivial fix directly and run an appropriate check, keeping any affected existing spec accurate. For substantive work, use `spec-plan` if available; otherwise write one local record with scope, scenarios, approach, verifiable tasks, evidence, and next action. Follow existing project conventions, including OpenSpec's native schema and artifacts.
 
-Choose the smallest pending outcome that exercises the real path through the affected layers. Implement and check that outcome before taking the next one.
+### 2. Choose context and executor
 
-- Derive checks from the behavior scenarios, including meaningful failure cases. Reuse the project's test framework and commands.
-- For a bug, reproduce the failure and add a regression test when it provides lasting value. When test-first development is requested, work one behavior at a time: observe the intended test failure, implement until it passes, then refactor while keeping it green.
-- Test observable contracts rather than internal call sequences. Use focused checks while iterating, then the required integration/build/lint checks appropriate to the change. Documentation or mechanical edits may need inspection instead of new automated tests.
-- Mark a task complete only when its outcome and check are satisfied. Record concise evidence: command or manual procedure, actual result, and relevant scenario. A missing dependency or unavailable service means not verified, not passed.
+For a substantive ready plan, a long/noisy session, or a requested handoff, read [context and execution guidance](references/context-and-execution.md). This skill requests one bounded implementation subagent when a suitable economical model, fresh-context spawn, and host permission are available and the transfer is worthwhile. Keep small or tightly coupled work local.
 
-Update the record when implementation teaches you something. Revise routine design decisions and remaining tasks in place. If desired behavior changes, reconcile it with the user's intent before coding the new scope; never weaken a requirement merely to make a failing test pass. Reopen affected tasks and invalidate stale evidence.
+Checkpoint before handing off or resetting. Prefer fresh task history over copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
 
-## Finish or leave a resumable state
+An assigned worker follows the work order and skips further delegation. A primary agent waits for delegated results and inspects the actual changes before closeout; it can perform independent read-only work while the worker writes.
 
-When available, use `spec-feedback` for progress updates, blockers, and handoffs, drawing on this record and actual check results. It adds no step or report file.
+### 3. Implement and check a slice
 
-After implementation, use `spec-close` if available: verify behavior against code, reconcile baseline specs, and archive the completed record. If unavailable, perform those steps directly, merging only verified requirement changes into their named specs before moving the record to `docs/changes/archive/YYYY-MM-DD-<name>.md`. Re-read baseline specs before merging; preserve unrelated requirements and resolve overlapping edits. Never overwrite an archive entry. Do not archive with failing or missing required checks, unresolved tasks, or conflicting specs.
+Choose the smallest pending outcome that exercises the real path through the affected layers. Implement it, then check its observable behavior before extending the solution.
 
-Respect a request to stop before closeout or to implement only a particular slice. On a blocker or partial stop, leave the record active with actual progress, failed/unrun checks, and a precise next action. Keep task tracking in that local file. Report what works and what remains. Local completion describes the current project files; it does not imply deployment or permission to publish or merge.
+Derive checks from scenarios, including meaningful failures. Reuse project test frameworks. Reproduce bugs and add regression coverage when useful. For requested TDD, observe one intended test failure, implement until it passes, then refactor while green. Mechanical or documentation edits may need inspection rather than new tests.
+
+Record the command or procedure, actual result, and behavior established. Run focused checks while iterating and required broader checks appropriate to the change. Update routine design decisions in place; reopen affected tasks and invalidate evidence after relevant changes.
+
+### 4. Close or leave resumable progress
+
+Checkpoint after meaningful verified slices and when pausing. Preserve partial results, failed/unrun checks, active ownership, and the exact next action.
+
+An implementation worker returns its results to the parent. The primary agent reads and follows `spec-close` when available. Otherwise verify every in-scope scenario, reconcile only verified changes into the named baseline specs, and archive the record under `docs/changes/archive/YYYY-MM-DD-<name>.md`. Re-read specs before editing, preserve unrelated requirements, resolve conflicts, and choose a distinct archive name on collision. Incomplete scope or required checks keep the record active.
+
+For updates and handoffs, read an installed `spec-feedback/SKILL.md` directly when useful; reuse it if already loaded. Otherwise report working behavior, evidence, remaining limitations, and the record's current path.

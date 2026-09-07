@@ -1,43 +1,52 @@
 ---
 name: spec-close
-description: Verify an implemented change against its requirements, reconcile the project's durable specs, and archive the completed change record. Also supports a requested verification-only review without changing files.
+description: Verify a change against its requirements, reconcile durable specs, and archive completed work. Use for closeout or a verification-only review of an implemented change.
 ---
 
 # Verify and close a change
 
-Close the gap between intended behavior, implemented behavior, and the project's written contract. If the user asked only for verification or review, report findings without editing specs, task state, or archive files. Otherwise close locally when the evidence supports completion.
+Reconcile intended behavior, implementation, and the written contract.
 
-## Select and verify
+## Rules
 
-Read existing project instructions and inspect relevant files and local edits. Use version-control status when available; a Git repository is not required. Select the named active change or the one unambiguously established in context; ask if several plausible records remain. Default records live at `docs/changes/*.md`. An already archived record needs no second archive; inspect it only if asked to reverify or investigate.
+- **Review-only means no edits.** Report findings without changing code, specs, task state, or archive files.
+- **Completion requires evidence.** Incomplete scope, failing/unavailable required checks, and unresolved spec conflicts keep the change active.
+- **Preserve the contract.** Never rewrite intended behavior to conceal a defect or discard unrelated requirements and scenarios.
+- **Preserve history.** Never overwrite an archive entry.
+- **Keep ownership clear.** Implementation workers return to the parent. Local closeout does not imply a commit, publication, or deployment.
 
-Read the record, affected code/tests, and referenced baseline specs. Follow the project's existing convention, including OpenSpec's schema and installed workflow when present. The compact Markdown format is not an OpenSpec CLI schema.
+## Process
 
-Assess three things:
+### 1. Establish the current state
 
-- **Coverage:** every in-scope requirement and task has implementation and evidence. Check behavior rather than trusting checked boxes.
-- **Correctness:** the implementation satisfies the concrete scenarios, including relevant error paths and compatibility. Tie each requirement to a test or observed check; a passing suite alone does not establish a missing scenario.
-- **Consistency:** implementation, stated behavior, and important design decisions agree. Distinguish a legitimate design adjustment from an unrequested behavior change.
+Read project instructions and inspect relevant files and local edits; Git is optional. Select the named active record or the one established in context, normally under `docs/changes/`. Ask when selection is ambiguous. An archived record needs no second archive; inspect it when explicitly asked to reverify or investigate.
 
-Use fresh evidence for the current code. Reuse earlier check results when neither the relevant code nor its dependencies/configuration have changed; rerun checks invalidated by subsequent edits. Run the repository's required checks and any missing scenario checks. Manual verification is valid when appropriate; write the steps and observation. Never describe an unrun check as passed.
+Follow the project's existing conventions, including OpenSpec's native artifacts/schema. Read the record, affected code/tests, and linked baseline specs. After a handoff or compaction, reconstruct state from these files. For delegated implementation, wait for the worker to stop and resolve ownership or integration gaps.
 
-For normal closeout, fix scoped defects when authorized, then reverify. For review-only work, report them. Failing or unavailable required checks, incomplete scope, and unresolved spec conflicts keep the change active. Record concrete blockers and next actions during normal closeout. Defer scope only when consistent with user direction, leaving an explicit record of what was excluded.
+### 2. Verify behavior against evidence
 
-## Reconcile the durable contract
+Assess:
 
-After verification, update only the affected baseline specs, normally `docs/specs/<capability>.md`:
+- **Coverage:** each in-scope requirement and task has implementation and evidence; check behavior rather than checkboxes.
+- **Correctness:** concrete scenarios, relevant error paths, and compatibility hold. A passing suite does not establish an untested scenario.
+- **Consistency:** implementation and important design choices agree with the intended behavior.
 
-- Re-read their current contents before writing; another change may have updated them since planning. Compare the intended edits with current requirements and resolve conflicts without discarding unrelated work.
-- Add new requirements, replace modified requirements with their complete resulting contract, and remove only explicitly retired behavior. Preserve unrelated scenarios. If a requested addition already exists, reconcile it rather than duplicating it.
-- Write current behavior and concrete scenarios in the project's spec style. Leave motivation, task history, and test logs in the change record. Create specs only for touched capabilities; a behavior-preserving refactor may need no baseline edit.
-- Read the resulting specs against the implemented behavior. Do not silently rewrite product intent to match a defect or record unimplemented behavior as current.
+Reuse check results still valid for current code, dependencies, and configuration. Run missing or invalidated checks and the project's required checks. Manual verification is appropriate when its steps and observations establish the behavior; distinguish passed, failed, and not run.
 
-## Archive and report
+During normal closeout, fix authorized scoped defects and reverify. During review-only work, report findings and stop here. Defer scope only when consistent with user direction, recording what was excluded. On a blocker, record the evidence and next action and leave the change active.
 
-When available, use `spec-feedback` to report verified outcomes and limitations, linking the final record location and affected specs. It adds no step or report file.
+### 3. Reconcile baseline specs
 
-Record final evidence and mark the record complete only after verification and spec reconciliation succeed. Move it to `docs/changes/archive/YYYY-MM-DD-<name>.md`, or the project's existing archive convention. Preserve its contents and working links. If the destination exists, use a distinct suffix; never overwrite history.
+Re-read the affected specs, normally `docs/specs/<capability>.md`, before writing: another change may have updated them. Resolve overlapping edits while preserving unrelated work.
 
-Keep reconciliation and archiving together as one local closeout operation; no Git commit or external tracker is needed. If interrupted after merging specs, resume by inspecting current state and applying only the remaining edits. Do not duplicate requirements or mark failed closeout complete.
+Add new requirements, replace modified requirements with their complete resulting contract, and remove only explicitly retired behavior. Reconcile an existing addition instead of duplicating it. Write current behavior and scenarios in the project's style; retain motivation and test logs in the change record. A behavior-preserving refactor may need no baseline edit.
 
-Report the implemented outcome, meaningful checks and their results, any limitation, and links to the updated specs and archive. Complete means verified in the current project files, not deployed. No commit, push, or merge is implied by closeout.
+Check the resulting specs against verified implementation. Create specs only for touched capabilities.
+
+### 4. Archive and report
+
+After verification and reconciliation succeed, record final evidence, mark complete, and move the record to `docs/changes/archive/YYYY-MM-DD-<name>.md` or the existing convention. Use a distinct suffix on collision and preserve contents and working links.
+
+Keep reconciliation and archiving together as one local operation. If interrupted, inspect current state and perform only the remaining edits.
+
+For the final report, read an installed `spec-feedback/SKILL.md` directly when useful, reusing it if already loaded. Otherwise state delivered behavior, meaningful check results, limitations, and the final spec/archive paths.

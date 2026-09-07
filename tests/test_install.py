@@ -7,7 +7,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = {"spec-plan", "spec-apply", "spec-close", "spec-feedback"}
+SKILLS = {"spec-plan", "spec-apply", "spec-close", "spec-feedback", "cmd-remote"}
 
 
 class InstallationTests(unittest.TestCase):
@@ -39,6 +39,14 @@ class InstallationTests(unittest.TestCase):
                 self.assertEqual((parent / name / "SKILL.md").read_bytes(),
                                  (ROOT / "skills" / name / "SKILL.md").read_bytes())
             self.assertTrue((parent / "spec-plan/references/change-template.md").is_file())
+            self.assertEqual(
+                (parent / "spec-apply/references/context-and-execution.md").read_bytes(),
+                (ROOT / "skills/spec-apply/references/context-and-execution.md").read_bytes(),
+            )
+            self.assertEqual(
+                (parent / "cmd-remote/references/session-protocol.md").read_bytes(),
+                (ROOT / "skills/cmd-remote/references/session-protocol.md").read_bytes(),
+            )
             (parent / "unrelated").mkdir()
             (parent / "unrelated/keep.txt").write_text("keep")
             (parent / "spec-plan/SKILL.md").write_text("old version")

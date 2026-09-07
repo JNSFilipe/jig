@@ -1,0 +1,133 @@
+# Session protocol
+
+Run these examples in **local Bash**, using actual target names and the same tmux socket throughout. The loop needs tmux, Bash, OpenSSL, Perl, and standard Unix utilities locally. Check availability; do not silently install them. Apply project command wrappers where required.
+
+## 1. Select a fixed pane
+
+Inspect an existing session before sending anything:
+
+~~~bash
+CMD_REMOTE_SESSION=cmd-pi
+tmux list-panes -s -t "=$CMD_REMOTE_SESSION" \
+  -F '#{pane_id} dead=#{pane_dead} command=#{pane_current_command} start=#{pane_start_command}'
+~~~
+
+Set CMD_REMOTE_PANE to the verified %N pane ID from that output:
+
+~~~bash
+tmux capture-pane -p -J -S -50 -t "$CMD_REMOTE_PANE"
+~~~
+
+Stable pane IDs avoid following the user's active-pane selection. Check connection details and, once an idle shell is established, read-only host/user identity. Never probe an authentication prompt, busy command, partially entered line, or unknown application.
+
+For a **new** session, pass SSH arguments separately:
+
+~~~bash
+CMD_REMOTE_TARGET=pi
+CMD_REMOTE_PANE=$(tmux new-session -d -P -F '#{pane_id}' \
+  -s "$CMD_REMOTE_SESSION" -x 200 -y 50 \
+  ssh "$CMD_REMOTE_TARGET")
+~~~
+
+Use the configured alias and required options. Width reduces wrapping; it does not guarantee byte-exact output. Preserve existing sessions. Optionally enable remain-on-exit on a newly created pane to retain disconnect output; leave global options alone.
+
+Let SSH authenticate first. New host fingerprints need trusted verification; changed keys need investigation. Preserve stricter existing verification settings. For one-shot noninteractive SSH, BatchMode=yes disables password and host-key questions; failures are not readiness.
+
+## 2. Probe an idle compatible shell
+
+After observing an idle Bourne-compatible shell:
+
+~~~bash
+CMD_REMOTE_NONCE=$(openssl rand -hex 16)
+tmux send-keys -t "$CMD_REMOTE_PANE" -l \
+  "printf '\n__READY_$CMD_REMOTE_NONCE\n'"
+tmux send-keys -t "$CMD_REMOTE_PANE" Enter
+tmux capture-pane -p -J -S -50 -t "$CMD_REMOTE_PANE"
+~~~
+
+Look for the exact standalone readiness line. If absent, wait briefly and inspect again. Successful send-keys proves only delivery, not execution. The round trip establishes responsiveness, not host identity. Non-shell programs need their native protocol.
+
+## 3. Log privately
+
+Inspect the pane's pipe first:
+
+~~~bash
+tmux display-message -p -t "$CMD_REMOTE_PANE" '#{pane_pipe}'
+~~~
+
+If already piped, establish its owner/destination; do not replace it or assume it writes your log. Use an agreed log or bounded pane capture if sufficient. Output lost from scrollback is unavailable evidence.
+
+With no existing pipe, create a private log:
+
+~~~bash
+CMD_REMOTE_DIR=$(umask 077; mktemp -d /tmp/cmd-remote.XXXXXXXX)
+CMD_REMOTE_LOG=$CMD_REMOTE_DIR/output.log
+(umask 077; : > "$CMD_REMOTE_LOG")
+tmux pipe-pane -O -t "$CMD_REMOTE_PANE" "cat >> '$CMD_REMOTE_LOG'"
+~~~
+
+This generated path is safe to quote as shown; arbitrary paths need shell escaping. The -o option opens only when no pipe exists; repeating it does **not** toggle logging off. A pipe is asynchronous: verify markers reach the chosen log before trusting it.
+
+Output may contain secrets. Before manual authentication, stop logging you own and hand control over with tmux attach-session -t <session>, without -r. Hidden password input is usually not echoed, but credentials must still stay out of tool arguments. Resume after the user returns control and the shell is ready.
+
+## 4. Frame one foreground command
+
+Set CMD to short, single-line shell code, then call the sender below. Stage complex multiline scripts through an appropriate file-transfer/execution tool instead; keep content and invocation reviewable.
+
+~~~bash
+cmd_remote_send() {
+  case "$CMD" in
+    *$'\n'*|*$'\r'*) printf '%s\n' 'Use a script for multiline commands.' >&2; return 2 ;;
+  esac
+  CMD_REMOTE_NONCE=$(openssl rand -hex 16) || return
+  CMD_REMOTE_OFFSET=$(wc -c < "$CMD_REMOTE_LOG") || return
+  local quoted=${CMD//\'/\'\\\'\'}
+  local payload="printf '\n__BEGIN_$CMD_REMOTE_NONCE\n'; eval '$quoted'; printf '\n__END_$CMD_REMOTE_NONCE:%d\n' \"\$?\""
+  tmux send-keys -t "$CMD_REMOTE_PANE" -l "$payload" || return
+  tmux send-keys -t "$CMD_REMOTE_PANE" Enter
+}
+~~~
+
+Review CMD under the current permission rules before calling. Literal sending avoids tmux key-name interpretation. Quoted eval keeps comments/quotes inside the command and preserves shell state such as cd; the local shell does not execute the payload. Marker-leading newlines handle prompts and output without trailing newlines, adding separator blank lines.
+
+Shell exit/replacement, errexit, persistent output redirection, and interactive programs may prevent completion markers; handle them as explicit transitions. Background launches report only launch status and may interleave later output. Pipelines report the configured shell status, usually the last stage. Check relevant stages explicitly or use a scoped shell with pipefail; do not silently change the user's shell options.
+
+## 5. Read output and completion
+
+Read bytes appended since the command started. Normalize common CSI/OSC sequences and carriage returns for line-oriented output:
+
+~~~bash
+cmd_remote_output() {
+  tail -c "+$((CMD_REMOTE_OFFSET + 1))" "$CMD_REMOTE_LOG" |
+    perl -pe 's/\e\](?:[^\a\e]|\e(?!\\))*(?:\a|\e\\)//g; s/\e\[[0-?]*[ -\/]*[@-~]//g; s/\r//g'
+}
+cmd_remote_status() {
+  cmd_remote_output | awk -v n="$CMD_REMOTE_NONCE" '
+    $0 == "__BEGIN_" n { begun=1; next }
+    begun && $0 ~ ("^__END_" n ":[0-9]+$") {
+      sub("^__END_" n ":", ""); print; exit
+    }'
+}
+~~~
+
+Poll cmd_remote_status in short waits, backing off for long work. A nonempty result, including 0, is the shell exit status. Yield each tool call within a few seconds to keep progress and user input responsive.
+
+Require BEGIN before the matching standalone END. The echoed command contains marker text but is not completion. Extract text between these markers and report a relevant excerpt. Normalization is not a terminal emulator or byte-exact capture: TUIs, binary/control output, and concurrent writers need another observation method.
+
+On a deadline, inspect recent output and pane_dead. Without END, the outcome is **unconfirmed**: running, awaiting input, disconnected, or lost logging are all possible. Do not send the next command or automatically retry. Interrupt only when authorized, then inspect effects.
+
+## 6. Stop logging or recover
+
+Close only your pipe with tmux pipe-pane -t "$CMD_REMOTE_PANE". Retain needed logs for a handoff; remove only task-owned temporary logs when no longer needed. Start a fresh log between commands if needed, never mid-command.
+
+Inspect the exact pane:
+
+~~~bash
+tmux display-message -p -t "$CMD_REMOTE_PANE" '#{pane_dead}'
+~~~
+
+If dead and reconnection is authorized, use tmux respawn-pane -t "$CMD_REMOTE_PANE" ssh ... with the original arguments. Omit -k, which can kill a live pane. A pane exists after exit only if tmux retained it; if gone, create a replacement deliberately and capture its ID. Recheck target, authentication, readiness, and pipe state. Reconnection says nothing about the previous command's effects.
+
+Local tmux cannot ensure remote-job survival. Verify a remote supervisor or tmux/screen job where persistence matters. Neither background & nor systemd-run --scope alone establishes persistence.
+
+Sources: [tmux manual](https://man.openbsd.org/tmux.1), [SSH configuration](https://man.openbsd.org/ssh_config). Repository protocol tests exercise local shell behavior, not device authentication or remote-job survival.

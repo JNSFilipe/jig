@@ -1,43 +1,62 @@
 ---
 name: spec-feedback
-description: Ground progress updates, decision requests, completion summaries, and handoffs in the local spec workflow's change records and verification evidence. Use when reporting on a coding change or writing a question into its plan or handoff.
+description: Report status, progress, findings, decisions, or a handoff for a coding change. Use for requests such as "what's done?", "how's it going?", or "what's next?", for completion summaries, and for questions written into a plan or handoff.
 ---
 
 # Spec feedback
 
-Let the user understand what works, what remains uncertain, and what decision matters without reconstructing the work. Apply this guidance within planning, implementation, or closeout; it adds no workflow step or report file.
+Find the evidence that answers the user's question and make the result understandable without reconstructing the work.
 
-Apply the same standard to questions written into a plan, design document, or handoff: the reader must be able to decide later without reconstructing this conversation.
+## Rules
 
-## Look up the claim, not the whole tree
+- **Separate intent from observation.** Proposed requirements, baseline specs, checkboxes, and archive entries are not proof of current behavior.
+- **State verification honestly.** Distinguish passed, failed, not run, and stale evidence. Confirm model/context transitions before describing them as executed; savings need measurements.
+- **Keep reporting scoped.** A status-only request leaves project files unchanged. Use existing records; reporting needs no separate document.
+- **Ask about behavior.** Resolve task numbering and document placement yourself. Questions in plans and handoffs need the same clarity as chat questions.
 
-Use the change named by the user or established in the current task. If selection is ambiguous and changes the answer, clarify which change is meant. Follow existing project conventions; these paths are defaults, relative to the project root:
+## Process
 
-| What the user needs to know | Where to look |
+### 1. Identify the question and change
+
+Determine whether the user needs status, a finding, a decision, completion evidence, or a handoff. Use the named change or the one established in the task. Clarify selection only when ambiguity changes the answer.
+
+Follow the project's existing layout. Default active records are `docs/changes/<name>.md`; baseline specs are under `docs/specs/`, and completed records under `docs/changes/archive/`. For a tiny fix with no record, use the request, relevant files, and checks.
+
+### 2. Read only the supporting evidence
+
+| Question | Read |
 | --- | --- |
-| Intended outcome and scope | Selected `docs/changes/<name>.md`: Why / scope and Behavior |
-| Progress, blocker, or next action | The same record: Tasks, Evidence, and Next |
-| Existing behavior contract | The specific `docs/specs/<capability>.md` named by the change |
-| Why an approach was chosen | Approach and any linked design document |
-| What actually works | Relevant code and tests, plus check results valid for the current files |
-| What a completed change delivered | Its exact record in `docs/changes/archive/`; inspect current code/specs if asked about behavior today |
+| Intended outcome or scope | Selected record: Why / scope and Behavior |
+| Progress, blocker, next action | Tasks, Evidence, and Next |
+| Existing behavior contract | The capability spec named by the record |
+| Reason for a design choice | Approach and any linked design document |
+| What actually works | Relevant code/tests and check results valid for current files |
+| What completed work delivered | Its exact archive record; current code/specs for behavior today |
+| Model or context transition | Execution notes and actual host results |
 
-Read only what supports the answer. Reuse context already inspected when it remains current. Search filenames or requirement names before reading more files; do not load every spec or scan the archive for a routine update. After closeout, use the record's new archive path.
+Reuse inspected context while current. Search filenames or requirement names before broadening; follow only relevant links. After closeout, use the record's archive path. Rerun checks only when needed to establish missing or invalidated evidence.
 
-A proposed requirement describes intent. A baseline spec describes the recorded contract. Neither a checked task nor an archived record proves current behavior. If they disagree with code or evidence, describe the discrepancy instead of claiming completion. Distinguish passed, failed, not run, and stale results. Do not rerun unchanged checks merely to write a summary.
+### 3. Establish the claim
 
-If a tiny fix has no record, use the request, relevant files, and actual checks. Do not create workflow documents just to report. A reporting-only request does not authorize editing records, fixing code, or archiving work; leave those actions to the enclosing task.
+Check the concrete scenario before presenting it as a finding. Separate observed behavior from inference; if inspection rules out the suspected scenario, drop that finding. Surface disagreement between intent, files, and evidence instead of assuming completion.
 
-## Make the answer usable
+Put relevant measurements, sample size, and conditions inside the claim. If the claim would stay unchanged with different evidence, make it more specific. For a payload, UI state, or data-row decision, lead with the smallest useful observed output and explain it afterward. Use an available read-only check when needed; protect secrets and unnecessary personal data. Label hypothetical examples and unobserved output.
 
-- Lead with the observable outcome or blocker. Describe what the user or caller can do, not the internal storage shape.
-- Put evidence inside the claim: the scenario exercised, actual result, and any limitation. Include sample size or measurement conditions when they affect the conclusion. Separate observations from inferences; do not present a schema possibility as an observed problem. If inspection rules out the suspected scenario, drop it as a finding.
-- When a decision concerns a payload, UI state, or data row, lead with the smallest relevant observed example and explain it afterward. Use an available read-only check when needed; do not expose secrets or unnecessary personal data. Label hypothetical examples and say when the real output has not been observed.
-- Ask about concrete behavior and tradeoffs. Recommend an option and explain its consequence. Resolve file ownership, task numbering, and document placement yourself. Reuse decisions already made; reporting adds no approval gate.
-- Match detail to the decision. A progress update explains what changed and what happens next. A completion summary states delivered behavior, meaningful verification, and remaining limitations. A handoff points to the selected record and its precise next action.
+### 4. Frame any decision
 
-For example, replace “Should task 2 depend on task 1?” with “Should export include all matching orders or only the visible page? I recommend all matches so downloading does not silently omit orders.” First check whether the existing requirements already answer it.
+Describe what happens in a real situation, using terms the user understands rather than storage details. Give each option a concrete consequence and recommend one with a reason. First check whether existing requirements already decide it.
 
-Before sending or saving a question, check whether the reader must look up an identifier, understand a storage detail, or guess an option's consequence. Rephrase around the actual situation. If a factual claim could stay unchanged with different evidence, make it more specific.
+For example: “Should export include all matching orders or only the visible page? I recommend all matches so downloading does not silently omit orders.” This is answerable without looking up a task identifier.
 
-Link the few files that let the user inspect the claim. Keep durable decisions and evidence in the existing change record under the enclosing workflow; do not duplicate them in a new status document or paste a transcript into the response.
+Before sending or saving the question, check whether the reader must look up an identifier, understand a storage detail, or guess an option's consequence. Rephrase where needed. Reporting adds no approval gate.
+
+### 5. Deliver the appropriate response
+
+Lead with the observable outcome or blocker:
+
+- **Progress:** what changed, what remains uncertain, and the next action.
+- **Completion:** delivered behavior, meaningful checks, and limitations.
+- **Handoff:** selected record, pending action, and any worker/process ownership needed to resume.
+- **Context/model transition:** checkpoint and what actually happened, or the manual action still needed; name the model only when confirmed.
+
+Link the few files needed to inspect the claim. Under an enclosing implementation task, keep durable decisions and evidence in the existing record. Avoid duplicating the record or pasting a transcript into the response.

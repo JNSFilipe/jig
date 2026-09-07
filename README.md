@@ -6,7 +6,7 @@ A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/
 
 ## Quick start
 
-Install the three workflow skills and `spec-feedback` into a project for both tools:
+Install the three workflow skills, `spec-feedback`, and the companion `cmd-remote` skill into a project for both tools:
 
 ```bash
 ./install.sh --local /path/to/project
@@ -50,7 +50,9 @@ Completion means verified in the current project files. Committing, pushing, mer
 
 ## Feedback grounded in the project
 
-[spec-feedback](skills/spec-feedback/SKILL.md) supports all three actions when explaining progress, requesting a decision, or handing work over. You do not need to invoke another step. For a standalone status request, use `$spec-feedback Summarize docs/changes/add-order-export.md` in Codex or `/spec-feedback Summarize docs/changes/add-order-export.md` in Claude Code; plugin installs use `/dev-skills:spec-feedback`.
+[spec-feedback](skills/spec-feedback/SKILL.md) supports all three actions when explaining progress, requesting a decision, or handing work over. The workflow skills read its instructions directly when needed and reuse them once loaded; this does not depend on invoking a nested skill command. Each also includes basic reporting guidance for installations without it. You do not need to invoke another step.
+
+For a standalone request such as “what's done?”, “how's it going?”, or “what's next?”, use `$spec-feedback Summarize docs/changes/add-order-export.md` in Codex or `/spec-feedback Summarize docs/changes/add-order-export.md` in Claude Code; plugin installs use `/dev-skills:spec-feedback`.
 
 It follows the existing document tree to find support for each claim:
 
@@ -135,6 +137,64 @@ Finish a session with the record's tasks, evidence, and next action up to date. 
 
 Several changes can remain active. Name the intended one when resuming. Closeout re-reads the current baseline before applying edits, so overlapping changes must be reconciled rather than overwriting each other.
 
+## Context and model handoffs
+
+The workflow now checkpoints context automatically and requests a fresh implementation worker when the available host tools support it and the task benefits. This happens inside `spec-apply`; there is no new command or setup document. See the [execution policy](skills/spec-apply/references/context-and-execution.md).
+
+### When to shed context
+
+| Situation | Default behavior |
+| --- | --- |
+| Short task with useful context already loaded | Continue in the same session |
+| Substantial exploration is finished and the plan is executable | Save a checkpoint; prefer a fresh implementation worker when suitable |
+| Host reports context pressure, or obsolete decisions repeatedly confuse the task | Save a checkpoint; compact for continuity or start fresh from the record when supported |
+| A meaningful slice finishes or execution pauses | Update tasks, evidence, and Next so the work survives context loss |
+| The same implementation failure repeats | Revisit the approach or escalate; clearing context alone will not fix it |
+
+The checkpoint uses the existing record: decisions and constraints, relevant paths, completed/pending work, actual check results, and the next bounded action. There is no duplicated handoff file. Any active worker/process must be accounted for before another agent resumes editing.
+
+**Compaction, a fresh conversation, and a model switch are different.** Compaction preserves a summary of history. A fresh worker starts without the planning conversation but still needs project instructions and the selected files. Switching models by itself does not clear history. A conversation fork or resumed worker can retain history.
+
+### Who does the implementation?
+
+For a self-contained, verifiable task, the default preference is:
+
+```text
+Planning agent → compact work order → economical worker with fresh task history
+       ↑                                  ↓
+       └──── inspect results, verify, and close locally
+```
+
+The worker receives the record and relevant file paths, editable scope, checks, and a stop condition. It implements its assigned slice and returns concise evidence. It does not redelegate or archive. The parent owns scope decisions, inspects the actual changes, and runs closeout. Only one implementation worker writes at a time.
+
+Model choice follows your explicit preference, then an existing execution-model setting, then the host's available model catalogue. The skill requests a suitable economical model when one is known; it does not assume a subagent automatically uses a cheaper model. If the model or its relative cost cannot be established, it reports that limit and retains the current model. No model IDs or pricing claims are baked into the skills.
+
+Keeping the same capable model is reasonable for small tasks, tightly coupled reasoning, or difficult work where retries and review would outweigh savings. A worker that repeats the same behavioral failure after one focused correction returns the problem to the parent. Delegation is a cost/quality tradeoff, not a guaranteed optimization.
+
+You can steer this once in the request or existing project instructions: “Use the available economical implementation model,” “Use <model> for implementation,” or “Keep this task in the current agent.” The workflow reuses that preference and does not ask you to select a model for every slice.
+
+### What can happen without intervention?
+
+| Action | What the skills can do |
+| --- | --- |
+| Preserve a resumable checkpoint | Automatically write it into the active record during authorized implementation |
+| Start an economical worker with fresh task history | Use native subagent tools when they expose the necessary context/model controls and allow delegation |
+| Reset or compact the parent conversation | Use an authorized callable control if exposed; otherwise recommend the host action and supply the resume prompt |
+| Change your global settings or launch a separate CLI/session | Requires a separate request; installation does not do this |
+
+During the capability check in Codex desktop on 2026-09-07, the exposed subagent tool supported no-history spawning and model selection, while no callable parent-context reset tool was exposed. This is an observation of that environment, not a guarantee for every installation; the skill checks the actual tools before acting.
+
+If a manual transition is needed, the agent supplies the real record path and a resume prompt such as `Use spec-apply to resume docs/changes/add-order-export.md; inspect current files and complete the next pending slice.` In the CLIs:
+
+- **Codex:** `/compact` summarizes the current chat; `/new` starts fresh; `/model` selects the model. After starting fresh, send the resume prompt. See [Codex commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli).
+- **Claude Code:** `/compact` summarizes, `/clear` starts fresh, and `/model` selects the model. After clearing, send the resume prompt. See [Claude Code commands](https://code.claude.com/docs/en/commands).
+
+These are user commands, not shell commands or actions performed by writing them in a skill. The agent recommends a manual transition only when useful; unsupported automation does not become a repeated permission loop. If clean context is explicitly required and unavailable, it checkpoints and reports the necessary action instead of silently continuing with old history.
+
+Claude Code documents [automatic context management](https://code.claude.com/docs/en/how-claude-code-works#the-context-window) and [fresh non-fork subagents with model controls](https://code.claude.com/docs/en/sub-agents). Codex documents [delegation from skills and per-agent model configuration](https://learn.chatgpt.com/docs/agent-configuration/subagents). Keep host auto-compaction enabled; the skills add durable checkpoints and task-boundary decisions, not a replacement compaction engine.
+
+These instructions cannot guarantee that a host exposes a particular tool, honors a requested model, or achieves lower total cost. Report actual transitions and observable model choices. The installer does not change personal model settings, compaction thresholds, or permission rules.
+
 ## What we took from OpenSpec
 
 Research reviewed on **2026-09-07**. This is an independent distillation, not an OpenSpec distribution or a replacement implementation of its CLI.
@@ -150,13 +210,14 @@ Research reviewed on **2026-09-07**. This is an independent distillation, not an
 
 OpenSpec separates change artifacts and uses schema-defined dependencies. Its concepts of [current specs, deltas, and archives](https://github.com/Fission-AI/OpenSpec/blob/main/docs/concepts.md) informed the durable record. Its [editable artifacts](https://github.com/Fission-AI/OpenSpec/blob/main/docs/editing-changes.md) informed the iterative loop. The [default schema](https://github.com/Fission-AI/OpenSpec/blob/main/schemas/spec-driven/schema.yaml) separates observable requirements from implementation choices and ties tasks to verification.
 
-Our deliberate simplifications are one normal change file, three entry points, integrated closeout, and a no-record path for trivial work. No schema engine, initialization step, status service, or automatic agent delegation is required. The tradeoff: agents maintain the Markdown by instruction; there is no deterministic schema validator or workflow engine enforcing it.
+Our deliberate simplifications are one normal change file, three entry points, integrated closeout, and a no-record path for trivial work. No schema engine, initialization step, or status service is required. Native subagents are used adaptively when available; the workflow also works without them. The tradeoff: agents maintain the Markdown by instruction; there is no deterministic schema validator or workflow engine enforcing it.
 
 **Already using OpenSpec?** Keep its native `openspec/` layout, schema, and generated skills/tooling. These skills defer to those conventions. The compact `docs/changes/*.md` format is not CLI-compatible OpenSpec input, and installation does not migrate or initialize an OpenSpec project. Use [OpenSpec itself](https://openspec.dev/docs/installation) when its tooling and schema customization are useful.
 
 ## Keeping the workflow lean
 
 - Keep three workflow actions and one supporting feedback skill. Load each skill body and its references only when needed.
+- Each skill separates mandatory rules from numbered process steps. A little repeated record-selection and path guidance keeps each entry point usable on its own; shared-reference generation would add another layer to maintain and load.
 - Read the selected change, affected specs, and relevant code; search before reading whole directories. Load supporting references only when needed.
 - Keep one source for each fact: intended change in the active record, current contract in baseline specs, implementation in code.
 - Record decisions and short verification results, not transcripts or full test logs. Reuse valid evidence; rerun it after relevant changes.
@@ -166,6 +227,16 @@ Our deliberate simplifications are one normal change file, three entry points, i
 These are design choices to reduce context and repeated work, not measured claims about token savings or model accuracy.
 
 ## Installation and updates
+
+### Remote device work
+
+[cmd-remote](skills/cmd-remote/SKILL.md) is a companion skill for SSH work in a local tmux pane you can watch. Use `$cmd-remote Inspect disk usage on pi` in Codex or `/cmd-remote Inspect disk usage on pi` in Claude Code. You can also name an existing authenticated session. One-shot checks use ordinary SSH when a shared terminal is unnecessary.
+
+The skill verifies the target and exact pane, checks readiness before typing, and records foreground command results. It preserves your authentication settings and hands credential entry to you when needed. Watch with a read-only tmux attachment; manual input requires a writable attachment and a pause in agent input. Local tmux does not guarantee that remote jobs survive an SSH disconnect.
+
+This skill uses local tmux; its shell protocol also needs Bash, OpenSSL, and Perl. It is independent of the spec workflow and adds no required workflow step.
+
+### Install the collection
 
 The installer requires Bash and standard Unix utilities (macOS, Linux, or WSL). The workflow itself is Markdown and requires no OpenSpec, Node, Python, hooks, or connectors.
 
@@ -189,13 +260,13 @@ Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#w
 
 Copy mode is the default and includes supporting references. Rerun installation after updating this checkout. Symlink mode requires the checkout to remain at the same path; use copy mode for a portable project. Restart the agent if newly installed skills do not appear.
 
-Installation replaces destination folders with matching workflow skill names, so preserve local edits before reinstalling. Unrelated skill names are untouched. The unrelated skills have been removed; `spec-feedback` is retained in a focused form. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the four included skills. With no scope argument, the scripts offer an interactive local/global choice.
+Installation replaces destination folders with matching skill names, so preserve local edits before reinstalling. Other skill names are untouched. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the five included skills. With no scope argument, the scripts offer an interactive local/global choice.
 
 Earlier versions incorrectly installed global Codex skills under `~/.gemini/config/skills/`. Reinstall to the corrected path. The scripts leave that legacy location untouched; remove only the old copies you recognize if they are no longer needed.
 
 ### Claude Code marketplace alternative
 
-The `dev-skills` plugin contains the same three workflow skills and `spec-feedback`:
+The `dev-skills` plugin contains the same three workflow skills, `spec-feedback`, and `cmd-remote`:
 
 ```text
 /plugin marketplace add JNSFilipe/skills
@@ -212,7 +283,7 @@ Use `/dev-skills:spec-apply`, `/dev-skills:spec-plan`, and `/dev-skills:spec-clo
 ./uninstall.sh --global
 ```
 
-Uninstallation removes the four included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
+Uninstallation removes the five included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
 
 ## Maintaining this repository
 
@@ -231,4 +302,8 @@ Python 3 is needed only for repository maintenance. Sync refuses to delete plugi
 
 Installer tests exercise copy/symlink installation, updates, dry runs, removal, and preservation of source/unrelated files in temporary projects. Global paths are checked through dry runs; tests never write to personal skill directories.
 
+Remote protocol tests execute the documented sender and reader in an isolated local tmux server. They cover output boundaries, quoting, shell state, pipeline status, pane selection, and missing completion. They require local tmux, Bash, OpenSSL, and Perl, plus permission to create a local socket; they skip when tools are absent and never connect to a device.
+
 For skill behavior, try a tiny fix, a multi-step feature, a paused change resumed in the other tool, and a closeout with a failed required check. Expect respectively: no new record, one evolving record, continuation from actual files, and an active record with a blocker. File validation and installer tests cannot prove agent behavior; evaluate real sessions before treating the workflow as a reliability guarantee.
+
+For context/handoff behavior, also exercise a ready plan with a worker available, an unavailable reset tool, a planning-only request, an explicit same-model preference, and a repeated worker failure. Expect a bounded work order with fresh task history, an honest fallback, no implementation, preference preservation, and escalation after the focused correction. These are behavioral evaluation cases; the installer tests do not exercise live model routing or context resets.
