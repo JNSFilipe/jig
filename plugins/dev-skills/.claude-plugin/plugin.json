@@ -1,7 +1,7 @@
 {
   "name": "dev-skills",
-  "version": "1.0.0",
-  "description": "A collection of five custom agent skills (grill-me, tdd, to-prd, to-issues, improve-codebase-architecture)",
+  "version": "1.1.0",
+  "description": "Three file-based coding skills for Codex and Claude Code: plan, apply, and close verified changes",
   "author": {
     "name": "JNSFilipe",
     "url": "https://github.com/JNSFilipe"
@@ -12,9 +12,9 @@
   "skills": "./skills/",
   "keywords": [
     "skills",
-    "tdd",
+    "spec-driven",
+    "workflow",
     "planning",
-    "architecture",
-    "requirements"
+    "verification"
   ]
 }

@@ -25,6 +25,7 @@ show_help() {
   echo -e "${BOLD}Options:${NC}"
   echo "  -l, --local [PATH]    Uninstall locally from the specified project path (default: current directory)"
   echo "  -g, --global          Uninstall globally from your home directory"
+  echo "  --dry-run            Show removals without writing files"
   echo "  -h, --help            Show this help message"
   echo
   echo -e "${BOLD}Examples:${NC}"
@@ -37,6 +38,7 @@ show_help() {
 LOCAL=false
 LOCAL_PATH=""
 GLOBAL=false
+DRY_RUN=false
 
 # Parse CLI arguments
 while [[ "$#" -gt 0 ]]; do
@@ -56,6 +58,9 @@ while [[ "$#" -gt 0 ]]; do
     -h|--help)
       show_help
       exit 0
+      ;;
+    --dry-run)
+      DRY_RUN=true
       ;;
     *)
       echo -e "${RED}Unknown option: $1${NC}" >&2
@@ -100,16 +105,17 @@ fi
 if [ ! -d "$SRC_DIR" ]; then
   echo -e "${RED}Error: Source skills directory not found at: $SRC_DIR${NC}" >&2
   echo "Using default list of skills to uninstall..."
-  SKILLS=("grill-me" "improve-codebase-architecture" "tdd" "to-issues" "to-prd")
+  SKILLS=("spec-plan" "spec-apply" "spec-close")
 else
   # Find all skill folders
   SKILLS=()
   for dir in "$SRC_DIR"/*; do
-    if [ -d "$dir" ]; then
+    if [ -f "$dir/SKILL.md" ]; then
       SKILLS+=("$(basename "$dir")")
     fi
   done
 fi
+
 
 # Function to uninstall a skill and clean up empty parent directories
 uninstall_skill() {
@@ -117,7 +123,18 @@ uninstall_skill() {
   local target_parent_dir="$2"
   local dest_path="$target_parent_dir/$skill_name"
 
+  if [ "$DRY_RUN" = true ]; then
+    if [ -e "$dest_path" ] || [ -L "$dest_path" ]; then
+      echo "Would remove: $dest_path"
+    fi
+    return
+  fi
+
   if [ -e "$dest_path" ] || [ -L "$dest_path" ]; then
+    if [ "$SRC_DIR/$skill_name" -ef "$dest_path" ] && [ ! -L "$dest_path" ]; then
+      echo "Error: Destination is the source skill: $dest_path" >&2
+      exit 1
+    fi
     rm -rf "$dest_path"
     echo -e "  ${GREEN}✓${NC} Removed ${BOLD}$skill_name${NC} from $dest_path"
   fi
@@ -171,12 +188,16 @@ if [ "$GLOBAL" = true ]; then
   done
   
   # Codex global path
-  CODEX_GLOBAL="$HOME/.gemini/config/skills"
-  echo -e "${YELLOW}Uninstalling from Codex (~/.gemini/config/skills/)...${NC}"
+  CODEX_GLOBAL="$HOME/.agents/skills"
+  echo -e "${YELLOW}Uninstalling from Codex (~/.agents/skills/)...${NC}"
   for skill in "${SKILLS[@]}"; do
     uninstall_skill "$skill" "$CODEX_GLOBAL"
   done
   echo
 fi
 
-echo -e "${GREEN}${BOLD}Uninstallation complete!${NC}"
+if [ "$DRY_RUN" = true ]; then
+  echo "Dry run complete; no files changed."
+else
+  echo -e "${GREEN}${BOLD}Uninstallation complete!${NC}"
+fi

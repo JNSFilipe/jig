@@ -26,6 +26,7 @@ show_help() {
   echo "  -l, --local [PATH]    Install locally in the specified project path (default: current directory)"
   echo "  -g, --global          Install globally in your home directory"
   echo "  -m, --mode MODE       Installation mode: 'copy' or 'symlink' (default: copy)"
+  echo "  --dry-run            Show destinations without writing files"
   echo "  -h, --help            Show this help message"
   echo
   echo -e "${BOLD}Examples:${NC}"
@@ -39,6 +40,7 @@ LOCAL=false
 LOCAL_PATH=""
 GLOBAL=false
 MODE="copy"
+DRY_RUN=false
 
 # Parse CLI arguments
 while [[ "$#" -gt 0 ]]; do
@@ -68,6 +70,9 @@ while [[ "$#" -gt 0 ]]; do
       show_help
       exit 0
       ;;
+    --dry-run)
+      DRY_RUN=true
+      ;;
     *)
       echo -e "${RED}Unknown option: $1${NC}" >&2
       show_help
@@ -82,7 +87,7 @@ if [ "$LOCAL" = false ] && [ "$GLOBAL" = false ]; then
   echo -e "${BLUE}=== Skill Installer for Claude Code & Codex ===${NC}"
   echo "Where would you like to install the skills?"
   echo "1) Install locally in the current project (creates .claude/ and .agents/)"
-  echo "2) Install globally (creates ~/.claude/ and ~/.gemini/config/)"
+  echo "2) Install globally (creates ~/.claude/ and ~/.agents/)"
   echo "3) Install both locally and globally"
   echo "4) Cancel"
   read -p "Select an option (1-4): " choice
@@ -130,8 +135,16 @@ fi
 # Find all skill folders
 SKILLS=()
 for dir in "$SRC_DIR"/*; do
-  if [ -d "$dir" ]; then
+  if [ -f "$dir/SKILL.md" ]; then
     SKILLS+=("$(basename "$dir")")
+  fi
+done
+
+
+for skill in "${SKILLS[@]}"; do
+  if [ ! -f "$SRC_DIR/$skill/SKILL.md" ]; then
+    echo "Error: Missing skill: $skill" >&2
+    exit 1
   fi
 done
 
@@ -149,7 +162,17 @@ install_skill() {
   local src_path="$SRC_DIR/$skill_name"
   local dest_path="$target_parent_dir/$skill_name"
 
+  if [ "$DRY_RUN" = true ]; then
+    echo "Would install ($install_mode): $src_path -> $dest_path"
+    return
+  fi
+
   mkdir -p "$target_parent_dir"
+
+  if [ "$src_path" -ef "$dest_path" ] && [ ! -L "$dest_path" ]; then
+    echo "Error: Destination is the source skill: $dest_path" >&2
+    exit 1
+  fi
 
   # Remove existing destination (file, folder, or symlink)
   if [ -e "$dest_path" ] || [ -L "$dest_path" ]; then
@@ -168,10 +191,17 @@ install_skill() {
 # Run local installation
 if [ "$LOCAL" = true ]; then
   # Resolve local path to absolute path
-  if [ ! -d "$LOCAL_PATH" ]; then
+  if [ ! -d "$LOCAL_PATH" ] && [ "$DRY_RUN" = false ]; then
     mkdir -p "$LOCAL_PATH"
   fi
-  ABS_LOCAL_PATH="$(cd "$LOCAL_PATH" && pwd)"
+  if [ -d "$LOCAL_PATH" ]; then
+    ABS_LOCAL_PATH="$(cd "$LOCAL_PATH" && pwd)"
+  else
+    case "$LOCAL_PATH" in
+      /*) ABS_LOCAL_PATH="$LOCAL_PATH" ;;
+      *) ABS_LOCAL_PATH="$PWD/$LOCAL_PATH" ;;
+    esac
+  fi
   
   echo -e "${BLUE}Installing skills locally in: ${BOLD}$ABS_LOCAL_PATH${NC} using ${BOLD}$MODE${NC} mode..."
   
@@ -203,13 +233,17 @@ if [ "$GLOBAL" = true ]; then
   done
   
   # Codex global path
-  CODEX_GLOBAL="$HOME/.gemini/config/skills"
-  echo -e "${YELLOW}Installing for Codex (~/.gemini/config/skills/)...${NC}"
+  CODEX_GLOBAL="$HOME/.agents/skills"
+  echo -e "${YELLOW}Installing for Codex (~/.agents/skills/)...${NC}"
   for skill in "${SKILLS[@]}"; do
     install_skill "$skill" "$CODEX_GLOBAL" "$MODE"
   done
   echo
 fi
 
-echo -e "${GREEN}${BOLD}Successfully installed all skills!${NC}"
-echo "Ready to use in Claude Code (as slash commands) and Codex (via agents)."
+if [ "$DRY_RUN" = true ]; then
+  echo "Dry run complete; no files changed."
+else
+  echo -e "${GREEN}${BOLD}Successfully installed the workflow skills!${NC}"
+  echo 'Use /spec-apply in Claude Code or $spec-apply in Codex.'
+fi
