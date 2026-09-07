@@ -66,7 +66,7 @@ CMD_REMOTE_LOG=$CMD_REMOTE_DIR/output.log
 tmux pipe-pane -O -t "$CMD_REMOTE_PANE" "cat >> '$CMD_REMOTE_LOG'"
 ~~~
 
-This generated path is safe to quote as shown; arbitrary paths need shell escaping. The -o option opens only when no pipe exists; repeating it does **not** toggle logging off. A pipe is asynchronous: verify markers reach the chosen log before trusting it.
+This generated path is safe to quote as shown; arbitrary paths need shell escaping. The -o option **toggles** an existing pipe off: tmux closes the old pipe, then declines to reopen it. The -O option selects output piping and replaces any existing pipe; do not reissue it mid-command or replace another owner's pipe. A pipe is asynchronous: verify markers reach the chosen log before trusting it.
 
 Output may contain secrets. Before manual authentication, stop logging you own and hand control over with tmux attach-session -t <session>, without -r. Hidden password input is usually not echoed, but credentials must still stay out of tool arguments. Resume after the user returns control and the shell is ready.
 
@@ -74,6 +74,7 @@ Output may contain secrets. Before manual authentication, stop logging you own a
 
 Set CMD to short, single-line shell code, then call the sender below. Stage complex multiline scripts through an appropriate file-transfer/execution tool instead; keep content and invocation reviewable.
 
+<!-- protocol-example: sender -->
 ~~~bash
 cmd_remote_send() {
   case "$CMD" in
@@ -96,6 +97,7 @@ Shell exit/replacement, errexit, persistent output redirection, and interactive 
 
 Read bytes appended since the command started. Normalize common CSI/OSC sequences and carriage returns for line-oriented output:
 
+<!-- protocol-example: reader -->
 ~~~bash
 cmd_remote_output() {
   tail -c "+$((CMD_REMOTE_OFFSET + 1))" "$CMD_REMOTE_LOG" |
@@ -129,5 +131,18 @@ tmux display-message -p -t "$CMD_REMOTE_PANE" '#{pane_dead}'
 If dead and reconnection is authorized, use tmux respawn-pane -t "$CMD_REMOTE_PANE" ssh ... with the original arguments. Omit -k, which can kill a live pane. A pane exists after exit only if tmux retained it; if gone, create a replacement deliberately and capture its ID. Recheck target, authentication, readiness, and pipe state. Reconnection says nothing about the previous command's effects.
 
 Local tmux cannot ensure remote-job survival. Verify a remote supervisor or tmux/screen job where persistence matters. Neither background & nor systemd-run --scope alone establishes persistence.
+
+## Authentication and recovery
+
+Pause agent input before handing the keyboard over. Preserve existing authorization and never retry an unconfirmed mutation automatically.
+
+| Observed state | Next step |
+| --- | --- |
+| Encrypted-key passphrase prompt | Let the user unlock the key in their terminal, or load that key into their existing agent with `ssh-add <private-key-path>`; then recheck authentication. |
+| Account password prompt | Offer writable attachment for manual authentication. If the intended public key is absent on the device and the user wants key login, suggest they run `ssh-copy-id -i <public-key-path> <target>` with the required connection options. It changes authorized keys and needs an existing login method; it is not a remedy for every password prompt. |
+| Permission denied | Check the configured user, host, identity, and authentication method before proposing a remedy. Do not keep retrying or replace keys blindly. |
+| New or changed host key | Ask the user to verify the fingerprint through a trusted source; investigate changes rather than bypassing verification. |
+| No readiness marker | Inspect the last pane output for a busy program, authentication prompt, or failed connection. Resolve that state before sending shell code. |
+| No END marker or dead pane | Inspect pane and pipe state, preserve partial output, and establish whether the prior command had effects before reconnecting or retrying. |
 
 Sources: [tmux manual](https://man.openbsd.org/tmux.1), [SSH configuration](https://man.openbsd.org/ssh_config). Repository protocol tests exercise local shell behavior, not device authentication or remote-job survival.

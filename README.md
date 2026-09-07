@@ -287,7 +287,7 @@ Uninstallation removes the five included skill names; it leaves other names and 
 
 ## Maintaining this repository
 
-`skills/` is canonical. `plugins/dev-skills/skills/` contains standalone copies for distribution; do not edit both independently.
+`skills/` is canonical. `plugins/dev-skills/skills/` contains standalone copies for distribution; do not edit both independently. [AGENTS.md](AGENTS.md) holds brief maintenance instructions; [CLAUDE.md](CLAUDE.md) imports them. These files apply to this collection and are not installed into consumer projects.
 
 After editing skills:
 
@@ -298,11 +298,13 @@ python3 -m unittest discover -s tests -v
 bash -n install.sh uninstall.sh
 ```
 
-Python 3 is needed only for repository maintenance. Sync refuses to delete plugin-only files automatically; resolve them deliberately. Keep plugin and marketplace versions aligned when preparing an update.
+Python 3 is needed only for repository maintenance. Sync refuses to delete plugin-only files automatically; resolve them deliberately. For a release, edit the version only in [the plugin manifest](plugins/dev-skills/.claude-plugin/plugin.json). Sync propagates it to the marketplace's version fields; `--check` detects both content and version drift without writing.
+
+The test suite includes that drift check. [CI](.github/workflows/validate.yml) runs it explicitly, runs the tests with terminal dependencies installed, and checks shell syntax on pushes and pull requests. CI validates the collection; GitHub is not a dependency of the installed workflow.
 
 Installer tests exercise copy/symlink installation, updates, dry runs, removal, and preservation of source/unrelated files in temporary projects. Global paths are checked through dry runs; tests never write to personal skill directories.
 
-Remote protocol tests execute the documented sender and reader in an isolated local tmux server. They cover output boundaries, quoting, shell state, pipeline status, pane selection, and missing completion. They require local tmux, Bash, OpenSSL, and Perl, plus permission to create a local socket; they skip when tools are absent and never connect to a device.
+Remote protocol tests execute the documented sender and reader in an isolated local tmux server. They cover output boundaries, quoting, shell state, pipeline status, pane selection, pipe toggling/replacement, and missing completion. The `protocol-example` comments identify the examples; either backtick or tilde fences work, and extra named helpers are allowed. Tests require local tmux, Bash, OpenSSL, and Perl, plus permission to create a local socket; terminal tests skip when tools are absent and never connect to a device.
 
 For skill behavior, try a tiny fix, a multi-step feature, a paused change resumed in the other tool, and a closeout with a failed required check. Expect respectively: no new record, one evolving record, continuation from actual files, and an active record with a blocker. File validation and installer tests cannot prove agent behavior; evaluate real sessions before treating the workflow as a reliability guarantee.
 

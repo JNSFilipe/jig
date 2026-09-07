@@ -12,7 +12,7 @@ Use local tmux to keep a visible terminal for the target. SSH targets need a com
 - **Keep commands reviewable.** State the target and intended operation. Apply host execution permissions to both transport and payload; tmux grants no additional authority and must not bypass a rejected command.
 - **Pin ownership to a pane.** Inspect before sending and use its stable pane ID, never whichever pane is active. One writer at a time; a session name alone verifies neither host nor readiness.
 - **Keep secrets out of tool calls and logs.** Use existing authentication. Hand credential entry to the user through a writable attachment, pausing logging you own. A password/passphrase prompt does not prove keys are missing.
-- **Preserve access.** Before operations that can remove data or connectivity, establish that the specific effect is authorized and arrange recovery where needed. Reuse explicit authorization; ask only about unresolved scope or risk.
+- **Preserve access.** For reboot/shutdown, disk writes or formatting (`dd`, `mkfs`, `fdisk`), recursive deletion (`rm -rf`), and SSH/firewall/network changes, check the exact target and effect are authorized and arrange recovery where needed. The same applies to removing packages or disabling services that provide remote access. Reuse explicit authorization; ask only about unresolved scope or risk.
 - **Missing completion means unknown.** A deadline without a marker proves neither success, failure, nor continued execution. Inspect before retrying or reconnecting; never replay an unconfirmed mutation automatically.
 - **Report what was verified.** A marker gives the foreground shell status, not background-job completion, every pipeline stage, or the device's resulting health.
 
@@ -29,6 +29,8 @@ Prefer the user's authenticated session. Otherwise reuse a verified idle session
 Inspect the exact pane, current screen, and transport; confirm an idle shell prompt before sending a probe. An SSH process name alone identifies neither the remote host nor whether its shell is idle.
 
 Handle host-key/authentication prompts explicitly. Preserve host verification and configured aliases, ports, jump hosts, and authentication. Do not automatically install keys or loosen sudo policy. Resolve an unclear target or current program before typing.
+
+Use the protocol's [recovery table](references/session-protocol.md#authentication-and-recovery) to give the user a concrete next step for authentication failures or missing markers.
 
 The marker loop requires a Bourne-compatible shell. Router CLIs, REPLs, database clients, serial login screens, and full-screen applications need their own interaction protocol. Serial transport can carry a normal shell; compatibility depends on the current program.
 

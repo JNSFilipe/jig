@@ -27,7 +27,7 @@ With no record, handle a trivial fix directly and run an appropriate check, keep
 
 ### 2. Choose context and executor
 
-For a substantive ready plan, a long/noisy session, or a requested handoff, read [context and execution guidance](references/context-and-execution.md). This skill requests one bounded implementation subagent when a suitable economical model, fresh-context spawn, and host permission are available and the transfer is worthwhile. Keep small or tightly coupled work local.
+Keep small or tightly coupled work local. For a settled, bounded task, this skill requests one economical implementation subagent when native tools permit fresh context and the expected benefit exceeds transfer and review costs. Read [context and execution guidance](references/context-and-execution.md) only when pursuing that handoff, responding to a requested transition, or handling actual context pressure/repeated confusion. Reuse it once loaded; a substantive plan alone does not require loading it.
 
 Checkpoint before handing off or resetting. Prefer fresh task history over copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
 
