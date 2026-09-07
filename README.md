@@ -4,6 +4,16 @@ A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/
 
 **Start with `spec-apply` and a concrete request.** It plans only as much as needed, implements, verifies, and closes the change. Use `spec-plan` separately when you want to review the approach before coding.
 
+## Included skills
+
+| Skill | What it does | When to use it | Result |
+| --- | --- | --- | --- |
+| [spec-plan](skills/spec-plan/SKILL.md) | Investigates the code and captures scope, behavior scenarios, implementation approach, and verifiable tasks. | You want to settle or review an approach before implementation. | A small local change record, or a chat plan for a trivial fix. Planning-only requests stop here. |
+| [spec-apply](skills/spec-apply/SKILL.md) | Plans as needed, implements in checked slices, records progress, and continues through closeout. Manages context and execution handoffs when supported and worthwhile. | You want to build a feature, fix a bug, or resume an existing plan. | Verified code and updated specs/archive when complete; a resumable record when blocked or paused. |
+| [spec-close](skills/spec-close/SKILL.md) | Verifies implementation against requirements, reconciles affected specs, and archives completed work. Also supports verification-only review. | Implementation is ready for closeout, or you want an independent review of its evidence. | Updated baseline specs and an archive record, or findings explaining why the change remains active. Review-only requests leave files unchanged. |
+| [spec-feedback](skills/spec-feedback/SKILL.md) | Uses the change record, relevant code, and actual checks to explain progress, findings, decisions, or a handoff. | You ask “what's done?”, “what's next?”, or need a decision or completion summary. | An evidence-based answer with useful file links; no additional report file is required. |
+| [cmd-remote](skills/cmd-remote/SKILL.md) | Runs remote commands through SSH, using a verified local tmux pane when shared visibility or interaction is useful. | You need to inspect or work on a device, watch execution, or reuse an authenticated session. | Observed command results and a reusable terminal session when needed. It is independent of the spec workflow. |
+
 ## Quick start
 
 Install the three workflow skills, `spec-feedback`, and the companion `cmd-remote` skill into a project for both tools:
@@ -47,6 +57,34 @@ These are actions you can revisit. You do not have to type all three commands.
 A tiny fix can go straight to editing and an appropriate check, with no new record. An existing spec still gets corrected if its contract changes. Add a separate design document only when technical decisions or migration details need the space. When you request test-first development, the same implementation skill runs a red-green-refactor loop, one behavior at a time.
 
 Completion means verified in the current project files. Committing, pushing, merging, and deploying follow the user's separate request and project rules.
+
+## Worked example: add CSV export
+
+Suppose an orders application needs an export of every order matching the current filters, subject to the existing access rules. Empty results should produce column headings, and commas and quotes must be escaped correctly. The paths below illustrate a new change; use the actual path the agent creates.
+
+For the shortest route, send one request:
+
+```text
+$spec-apply Add CSV export for all orders matching the current filters.
+Reuse existing access rules. Include column headings when no orders match,
+and handle commas and quotes correctly. Implement and verify the change.
+```
+
+In Claude Code, replace `$spec-apply` with `/spec-apply`; for a plugin installation, use `/dev-skills:spec-apply`. The agent investigates, records the substantive change, implements and checks it, then closes it when the evidence supports completion.
+
+If you want to review the plan first, use this sequence instead:
+
+| Step | Example message in Codex | What happens |
+| --- | --- | --- |
+| 1. Plan | `$spec-plan Plan CSV export for all filtered orders using existing access rules, including empty results and CSV escaping. Do not implement yet.` | The agent investigates and writes a record such as `docs/changes/add-order-export.md`, with scenarios and an ordered task checklist. It stops for your review. |
+| 2. Build | `$spec-apply Implement docs/changes/add-order-export.md through completion. Use an available economical implementation model when suitable.` | The agent implements and verifies the tasks. It can hand settled work to a fresh worker when the host supports it; otherwise it continues within your constraints. |
+| 3. Finish | No additional command is normally needed. | After required checks pass, the agent updates `docs/specs/order-export.md` and moves the record to `docs/changes/archive/YYYY-MM-DD-add-order-export.md`. Failed or unavailable required checks leave it active with the next action recorded. |
+
+The same sequence works in Claude Code with `/spec-plan` and `/spec-apply`, or their `/dev-skills:` plugin equivalents.
+
+During a pause, ask `$spec-feedback What's done and what's next for docs/changes/add-order-export.md?` for a grounded status report. To resume in a fresh conversation or the other coding tool, provide the active record to `spec-apply`; the record and current code carry the context. If implementation was deliberately stopped before closeout, invoke `spec-close` with that record when ready.
+
+This example needs no issue tracker or repository initialization. You only invoke the steps you need; committing or publishing the result is a separate request.
 
 ## Feedback grounded in the project
 
