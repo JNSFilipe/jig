@@ -7,7 +7,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = {"spec-plan", "spec-apply", "spec-close", "spec-feedback", "spec-debug", "cmd-remote"}
+SKILLS = {"jig-plan", "jig-apply", "jig-close", "jig-feedback", "jig-debug", "jig-remote"}
 
 
 class InstallationTests(unittest.TestCase):
@@ -38,22 +38,22 @@ class InstallationTests(unittest.TestCase):
             for name in SKILLS:
                 self.assertEqual((parent / name / "SKILL.md").read_bytes(),
                                  (ROOT / "skills" / name / "SKILL.md").read_bytes())
-            self.assertTrue((parent / "spec-plan/references/change-template.md").is_file())
+            self.assertTrue((parent / "jig-plan/references/change-template.md").is_file())
             self.assertEqual(
-                (parent / "spec-apply/references/context-and-execution.md").read_bytes(),
-                (ROOT / "skills/spec-apply/references/context-and-execution.md").read_bytes(),
+                (parent / "jig-apply/references/context-and-execution.md").read_bytes(),
+                (ROOT / "skills/jig-apply/references/context-and-execution.md").read_bytes(),
             )
             self.assertEqual(
-                (parent / "cmd-remote/references/session-protocol.md").read_bytes(),
-                (ROOT / "skills/cmd-remote/references/session-protocol.md").read_bytes(),
+                (parent / "jig-remote/references/session-protocol.md").read_bytes(),
+                (ROOT / "skills/jig-remote/references/session-protocol.md").read_bytes(),
             )
             (parent / "unrelated").mkdir()
             (parent / "unrelated/keep.txt").write_text("keep")
-            (parent / "spec-plan/SKILL.md").write_text("old version")
+            (parent / "jig-plan/SKILL.md").write_text("old version")
         self.run_script("install.sh", "--local", self.project)
         for parent in self.skill_parents():
-            self.assertEqual((parent / "spec-plan/SKILL.md").read_bytes(),
-                             (ROOT / "skills/spec-plan/SKILL.md").read_bytes())
+            self.assertEqual((parent / "jig-plan/SKILL.md").read_bytes(),
+                             (ROOT / "skills/jig-plan/SKILL.md").read_bytes())
         self.run_script("uninstall.sh", "--local", self.project)
         self.run_script("uninstall.sh", "--local", self.project)
         for parent in self.skill_parents():
@@ -84,8 +84,8 @@ class InstallationTests(unittest.TestCase):
         self.run_script("install.sh", "--local", self.project, "--dry-run")
         self.assertFalse(self.project.exists())
         output = self.run_script("install.sh", "--global", "--dry-run")
-        self.assertIn(str(Path.home() / ".agents/skills/spec-plan"), output)
-        self.assertIn(str(Path.home() / ".claude/skills/spec-plan"), output)
+        self.assertIn(str(Path.home() / ".agents/skills/jig-plan"), output)
+        self.assertIn(str(Path.home() / ".claude/skills/jig-plan"), output)
         self.assertNotIn(".gemini", output)
         output = self.run_script("uninstall.sh", "--global", "--dry-run")
         self.assertIn("~/.agents/skills/", output)
@@ -109,7 +109,7 @@ class InstallationTests(unittest.TestCase):
         for script in ("install.sh", "uninstall.sh"):
             output = self.run_script(script, "--local", self.project, success=False)
             self.assertIn("Destination is the source skill", output)
-        self.assertTrue((ROOT / "skills/spec-plan/SKILL.md").is_file())
+        self.assertTrue((ROOT / "skills/jig-plan/SKILL.md").is_file())
 
 
 if __name__ == "__main__":

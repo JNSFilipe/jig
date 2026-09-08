@@ -38,17 +38,27 @@ class SyncTests(unittest.TestCase):
         return result.stdout + result.stderr
 
     def test_check_detects_content_drift_without_writing(self):
-        destination = self.root / "plugins/dev-skills/skills/spec-apply/SKILL.md"
+        destination = self.root / "plugins/jig/skills/apply/SKILL.md"
         destination.write_text("stale distribution")
         output = self.sync("--check", success=False)
-        self.assertIn("spec-apply/SKILL.md", output)
+        self.assertIn("apply/SKILL.md", output)
         self.assertEqual(destination.read_text(), "stale distribution")
         self.sync()
-        self.assertEqual(destination.read_bytes(), (self.root / "skills/spec-apply/SKILL.md").read_bytes())
+        self.assertNotEqual(destination.read_bytes(), (self.root / "skills/jig-apply/SKILL.md").read_bytes())
         self.sync("--check")
 
+    def test_distribution_drops_the_prefix_and_rewrites_references(self):
+        canonical = (self.root / "skills/jig-apply/SKILL.md").read_text()
+        self.assertIn("name: jig-apply", canonical)
+        self.assertIn("`jig-feedback/SKILL.md`", canonical)
+        distributed = (self.root / "plugins/jig/skills/apply/SKILL.md").read_text()
+        self.assertIn("name: apply", distributed)
+        self.assertIn("`feedback/SKILL.md`", distributed)
+        self.assertNotIn("jig-", distributed)
+        self.assertFalse((self.root / "plugins/jig/skills/jig-apply").exists())
+
     def test_manifest_version_drives_marketplace_without_changing_other_fields(self):
-        manifest_path = self.root / "plugins/dev-skills/.claude-plugin/plugin.json"
+        manifest_path = self.root / "plugins/jig/.claude-plugin/plugin.json"
         manifest = json.loads(manifest_path.read_text())
         manifest["version"] = "9.8.7"
         manifest_path.write_text(json.dumps(manifest))
@@ -64,7 +74,7 @@ class SyncTests(unittest.TestCase):
         self.sync("--check")
 
     def test_plugin_only_work_is_preserved(self):
-        extra = self.root / "plugins/dev-skills/skills/spec-plan/private-note.md"
+        extra = self.root / "plugins/jig/skills/plan/private-note.md"
         extra.write_text("preserve this")
         self.assertIn("Plugin-only", self.sync("--check", success=False))
         self.sync(success=False)

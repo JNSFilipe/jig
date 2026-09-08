@@ -1,26 +1,26 @@
 {
-  "name": "jnsfilipe-skills",
+  "name": "jig",
   "version": "1.3.0",
-  "description": "Lean coding skills for Codex and Claude Code: spec workflow, evidence-based feedback, and watchable SSH sessions",
+  "description": "Lean file-based coding workflow for Codex and Claude Code: plan, apply, close, debug, evidence-based feedback, and watchable remote commands",
   "owner": {
     "name": "JNSFilipe",
     "url": "https://github.com/JNSFilipe"
   },
   "plugins": [
     {
-      "name": "dev-skills",
+      "name": "jig",
       "version": "1.3.0",
-      "description": "Lean coding skills for Codex and Claude Code: spec workflow, evidence-based feedback, and watchable SSH sessions",
+      "description": "Lean file-based coding workflow for Codex and Claude Code: plan, apply, close, debug, evidence-based feedback, and watchable remote commands",
       "author": {
         "name": "JNSFilipe"
       },
-      "homepage": "https://github.com/JNSFilipe/skills",
-      "repository": "https://github.com/JNSFilipe/skills",
+      "homepage": "https://github.com/JNSFilipe/jig",
+      "repository": "https://github.com/JNSFilipe/jig",
       "license": "MIT",
       "source": {
         "source": "git-subdir",
-        "url": "https://github.com/JNSFilipe/skills.git",
-        "path": "plugins/dev-skills",
+        "url": "https://github.com/JNSFilipe/jig.git",
+        "path": "plugins/jig",
         "ref": "main"
       }
     }

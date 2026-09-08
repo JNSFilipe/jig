@@ -11,7 +11,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REFERENCE = ROOT / "skills/cmd-remote/references/session-protocol.md"
+REFERENCE = ROOT / "skills/jig-remote/references/session-protocol.md"
 REQUIRED = ("tmux", "bash", "openssl", "perl")
 
 
@@ -53,7 +53,7 @@ class ProtocolDocumentationTests(unittest.TestCase):
                      "Protocol tests require tmux, Bash, OpenSSL, and Perl")
 class RemoteProtocolTests(unittest.TestCase):
     def setUp(self):
-        self.temp = tempfile.TemporaryDirectory(prefix="cmd-remote-test-", dir="/tmp")
+        self.temp = tempfile.TemporaryDirectory(prefix="jig-remote-test-", dir="/tmp")
         self.addCleanup(self.temp.cleanup)
         self.work = Path(self.temp.name)
         self.socket = str(self.work / "tmux.sock")
@@ -71,11 +71,11 @@ class RemoteProtocolTests(unittest.TestCase):
         examples = protocol_examples(REFERENCE.read_text())
         self.helper = self.work / "protocol.sh"
         self.helper.write_text(
-            'tmux() { command tmux -S "$CMD_REMOTE_SOCKET" "$@"; }\n'
+            'tmux() { command tmux -S "$JIG_REMOTE_SOCKET" "$@"; }\n'
             + examples["sender"] + "\n" + examples["reader"] + "\n"
         )
-        self.env.update(CMD_REMOTE_SOCKET=self.socket, CMD_REMOTE_PANE=self.pane,
-                        CMD_REMOTE_LOG=str(self.log))
+        self.env.update(JIG_REMOTE_SOCKET=self.socket, JIG_REMOTE_PANE=self.pane,
+                        JIG_REMOTE_LOG=str(self.log))
         self.wait_for(lambda: "TEST>" in self.tmux("capture-pane", "-p", "-t", self.pane))
 
     def stop_server(self):
@@ -107,24 +107,24 @@ class RemoteProtocolTests(unittest.TestCase):
         self.fail("Timed out waiting for isolated test pane")
 
     def send(self, command):
-        result = self.shell('cmd_remote_send || exit $?; '
-                            'printf "%s %s\\n" "$CMD_REMOTE_NONCE" "$CMD_REMOTE_OFFSET"',
+        result = self.shell('jig_remote_send || exit $?; '
+                            'printf "%s %s\\n" "$JIG_REMOTE_NONCE" "$JIG_REMOTE_OFFSET"',
                             CMD=command)
         self.assertEqual(result.returncode, 0, result.stderr)
         nonce, offset = result.stdout.strip().split()
-        self.env.update(CMD_REMOTE_NONCE=nonce, CMD_REMOTE_OFFSET=offset)
+        self.env.update(JIG_REMOTE_NONCE=nonce, JIG_REMOTE_OFFSET=offset)
 
     def status(self):
-        result = self.shell("cmd_remote_status")
+        result = self.shell("jig_remote_status")
         self.assertEqual(result.returncode, 0, result.stderr)
         return result.stdout.strip()
 
     def run_command(self, command, expected_status=0):
         self.send(command)
         self.assertEqual(self.wait_for(self.status), str(expected_status))
-        result = self.shell("cmd_remote_output")
+        result = self.shell("jig_remote_output")
         lines = result.stdout.splitlines()
-        nonce = self.env["CMD_REMOTE_NONCE"]
+        nonce = self.env["JIG_REMOTE_NONCE"]
         start = lines.index("__BEGIN_" + nonce)
         end = lines.index(f"__END_{nonce}:{expected_status}", start + 1)
         return "\n".join(lines[start + 1:end]).strip("\n")
@@ -148,8 +148,8 @@ class RemoteProtocolTests(unittest.TestCase):
                     self.assertEqual(actual, output)
 
     def test_quotes_execute_remotely_and_shell_state_persists(self):
-        self.run_command("cd /; export CMD_REMOTE_TEST_VALUE='state stays'")
-        output = self.run_command('printf "%s|%s|%s" "$(pwd)" "$CMD_REMOTE_TEST_VALUE" "it\'s literal"')
+        self.run_command("cd /; export JIG_REMOTE_TEST_VALUE='state stays'")
+        output = self.run_command('printf "%s|%s|%s" "$(pwd)" "$JIG_REMOTE_TEST_VALUE" "it\'s literal"')
         self.assertEqual(output, "/|state stays|it's literal")
 
     def test_stable_pane_when_user_selects_another(self):
@@ -169,7 +169,7 @@ class RemoteProtocolTests(unittest.TestCase):
         self.assertEqual(self.run_command("printf 'logging-restored'"), "logging-restored")
 
     def test_missing_completion_and_multiline_rejection(self):
-        result = self.shell("cmd_remote_send", CMD="printf 'one'\nprintf 'two'")
+        result = self.shell("jig_remote_send", CMD="printf 'one'\nprintf 'two'")
         self.assertEqual(result.returncode, 2)
         self.send("sleep 0.4; printf 'finished'")
         self.assertEqual(self.status(), "")

@@ -245,5 +245,5 @@ if [ "$DRY_RUN" = true ]; then
   echo "Dry run complete; no files changed."
 else
   echo -e "${GREEN}${BOLD}Successfully installed the workflow skills!${NC}"
-  echo 'Use /spec-apply in Claude Code or $spec-apply in Codex.'
+  echo 'Use /jig-apply in Claude Code or $jig-apply in Codex.'
 fi
