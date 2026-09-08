@@ -200,7 +200,7 @@ Several changes can remain active. Name the intended one when resuming. Closeout
 
 ## Context and model handoffs
 
-The workflow now checkpoints context automatically and requests a fresh implementation worker when the available host tools support it and the task benefits. This happens inside `spec-apply`; there is no new command or setup document. See the [execution policy](skills/spec-apply/references/context-and-execution.md).
+The workflow now checkpoints context automatically and requests a fresh implementation worker when the available host tools support it and the task benefits. This happens inside `spec-apply`; there is no new command or setup document. The agent's [decision table](skills/spec-apply/SKILL.md#2-choose-context-and-executor) is in the skill body, so routine decisions do not depend on loading a reference. The [execution policy](skills/spec-apply/references/context-and-execution.md) supplies the details when a transition is needed.
 
 ### When to shed context
 

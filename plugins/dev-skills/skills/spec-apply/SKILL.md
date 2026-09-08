@@ -27,7 +27,17 @@ With no record, handle a trivial fix directly and run an appropriate check, keep
 
 ### 2. Choose context and executor
 
-Keep small or tightly coupled work local. For a settled, bounded task, this skill requests one economical implementation subagent when native tools permit fresh context and the expected benefit exceeds transfer and review costs. Read [context and execution guidance](references/context-and-execution.md) only when pursuing that handoff, responding to a requested transition, or handling actual context pressure/repeated confusion. Reuse it once loaded; a substantive plan alone does not require loading it.
+Reassess at the start, after a meaningful slice or long detour, and when context pressure or confusion appears:
+
+| Situation | Action |
+| --- | --- |
+| Small or tightly coupled task; current context remains useful | Continue locally. Session length alone does not require a reset. |
+| Substantial exploration finished; a bounded task is ready | Checkpoint; prefer one economical worker with fresh history when native tools permit it and the benefit exceeds transfer/review costs. |
+| Host reports context pressure, or obsolete decisions repeatedly confuse work | Checkpoint; compact for continuity, or start fresh when the record is sufficient to resume. |
+| Meaningful slice complete, pause, or upcoming long detour | Update tasks, evidence, decisions, ownership, and Next in the record; reset only if otherwise warranted. |
+| Same failure persists after a correction | Revisit the diagnosis or escalate under the worker retry policy; clearing context alone does not fix the cause. |
+
+Read [context and execution guidance](references/context-and-execution.md) before carrying out a handoff/reset or responding to a requested transition. Reuse it once loaded. The table above guides routine decisions without loading the reference.
 
 Checkpoint before handing off or resetting. Prefer fresh task history over copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
 

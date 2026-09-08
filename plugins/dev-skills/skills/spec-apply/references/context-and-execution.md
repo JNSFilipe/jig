@@ -1,6 +1,6 @@
 # Context and execution
 
-Read when pursuing a suitable handoff, responding to a requested transition, or recovering from actual context pressure/confusion. Routine checkpoints need no reference reload.
+Use spec-apply's situation/action table for routine context decisions. Read this reference when carrying out a handoff/reset or responding to a requested transition; reuse it once loaded.
 
 ## 1. Save a checkpoint
 
