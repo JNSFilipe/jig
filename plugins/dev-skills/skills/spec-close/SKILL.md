@@ -33,6 +33,8 @@ Assess:
 
 Reuse check results still valid for current code, dependencies, and configuration. Run missing or invalidated checks and the project's required checks. Manual verification is appropriate when its steps and observations establish the behavior; distinguish passed, failed, and not run.
 
+For an unexplained failing check, read an installed `spec-debug/SKILL.md` directly, reusing it once loaded. Otherwise reproduce the failure and test a focused explanation. Keep the current scope: review-only diagnosis stays read-only; normal closeout may fix authorized defects. Return to verification afterward, keeping unresolved failures active.
+
 During normal closeout, fix authorized scoped defects and reverify. During review-only work, report findings and stop here. Defer scope only when consistent with user direction, recording what was excluded. On a blocker, record the evidence and next action and leave the change active.
 
 ### 3. Reconcile baseline specs

@@ -37,6 +37,8 @@ An assigned worker follows the work order and skips further delegation. A primar
 
 Choose the smallest pending outcome that exercises the real path through the affected layers. Implement it, then check its observable behavior before extending the solution.
 
+For an unexplained failure, intermittent bug, or unsuccessful fix, read an installed `spec-debug/SKILL.md` directly and reuse it once loaded. Otherwise reproduce the failure, trace the cause, and test one explanation before correcting it. Keep diagnostic evidence in the same record; a known, localized cause needs no separate debugging step.
+
 Derive checks from scenarios, including meaningful failures. Reuse project test frameworks. Reproduce bugs and add regression coverage when useful. For requested TDD, observe one intended test failure, implement until it passes, then refactor while green. Mechanical or documentation edits may need inspection rather than new tests.
 
 Record the command or procedure, actual result, and behavior established. Run focused checks while iterating and required broader checks appropriate to the change. Update routine design decisions in place; reopen affected tasks and invalidate evidence after relevant changes.

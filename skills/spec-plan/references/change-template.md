@@ -30,6 +30,8 @@ use Preserve for a refactor with no contract change.>
 <Initially, intended check commands and any required setup. During work,
 record actual command, outcome, and the behavior it establishes.
 Distinguish passed, failed, and not run. Do not paste full logs.>
+<When investigating a failure, retain the hypothesis, experiment, actual
+result, and ruled-out causes here; keep the next experiment in Next.>
 
 ## Next
 <Next action or blocker; remove when complete. For a context/model handoff,

@@ -1,6 +1,6 @@
 # Lean coding skills for Codex and Claude Code
 
-A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/): capture intent, build in verified slices, and keep the spec accurate. Three workflow actions, one supporting feedback skill, one active change file. All task tracking lives in local Markdown; Git and external services are optional.
+A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/): capture intent, build in verified slices, and keep the spec accurate. Three workflow actions, supporting feedback and debugging skills, one active change file. All task tracking lives in local Markdown; Git and external services are optional.
 
 **Start with `spec-apply` and a concrete request.** It plans only as much as needed, implements, verifies, and closes the change. Use `spec-plan` separately when you want to review the approach before coding.
 
@@ -12,11 +12,12 @@ A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/
 | [spec-apply](skills/spec-apply/SKILL.md) | Plans as needed, implements in checked slices, records progress, and continues through closeout. Manages context and execution handoffs when supported and worthwhile. | You want to build a feature, fix a bug, or resume an existing plan. | Verified code and updated specs/archive when complete; a resumable record when blocked or paused. |
 | [spec-close](skills/spec-close/SKILL.md) | Verifies implementation against requirements, reconciles affected specs, and archives completed work. Also supports verification-only review. | Implementation is ready for closeout, or you want an independent review of its evidence. | Updated baseline specs and an archive record, or findings explaining why the change remains active. Review-only requests leave files unchanged. |
 | [spec-feedback](skills/spec-feedback/SKILL.md) | Uses the change record, relevant code, and actual checks to explain progress, findings, decisions, or a handoff. | You ask “what's done?”, “what's next?”, or need a decision or completion summary. | An evidence-based answer with useful file links; no additional report file is required. |
+| [spec-debug](skills/spec-debug/SKILL.md) | Reproduces a failure, traces its cause, tests a hypothesis, and verifies an authorized correction. | A bug is unexplained, intermittent, or persists after a fix; you want diagnosis or diagnosis and repair. | Evidence-backed findings or a verified correction, with investigation notes in the existing change record when needed. |
 | [cmd-remote](skills/cmd-remote/SKILL.md) | Runs remote commands through SSH, using a verified local tmux pane when shared visibility or interaction is useful. | You need to inspect or work on a device, watch execution, or reuse an authenticated session. | Observed command results and a reusable terminal session when needed. It is independent of the spec workflow. |
 
 ## Quick start
 
-Install the three workflow skills, `spec-feedback`, and the companion `cmd-remote` skill into a project for both tools:
+Install the three workflow skills, `spec-feedback`, `spec-debug`, and the companion `cmd-remote` skill into a project for both tools:
 
 ```bash
 ./install.sh --local /path/to/project
@@ -85,6 +86,28 @@ The same sequence works in Claude Code with `/spec-plan` and `/spec-apply`, or t
 During a pause, ask `$spec-feedback What's done and what's next for docs/changes/add-order-export.md?` for a grounded status report. To resume in a fresh conversation or the other coding tool, provide the active record to `spec-apply`; the record and current code carry the context. If implementation was deliberately stopped before closeout, invoke `spec-close` with that record when ready.
 
 This example needs no issue tracker or repository initialization. You only invoke the steps you need; committing or publishing the result is a separate request.
+
+## Debugging an unexpected failure
+
+[spec-debug](skills/spec-debug/SKILL.md) is intended to activate automatically when a bug, failing check, or unexpected behavior needs diagnosis, including during ordinary coding work. You do not need to name the skill or request a separate debugging step. `spec-apply` and `spec-close` also read it directly when needed. Closeout reviews retain their read-only scope during diagnosis.
+
+For example, suppose the CSV export works without filters but fails when a status filter is selected:
+
+```text
+Investigate why exporting orders with a status filter fails.
+Unfiltered export works. Use docs/changes/add-order-export.md.
+Diagnose only; do not implement a fix yet.
+```
+
+For diagnosis and repair, replace the last line with “Find and fix the cause, then verify the filtered and unfiltered cases.” Explicit invocation is optional: `$spec-debug` in Codex, `/spec-debug` in Claude Code, or `/dev-skills:spec-debug` with the plugin.
+
+The agent establishes the reproduction, compares the working case, and tests a specific explanation before proposing a correction. For this example it might inspect whether the exporter receives the selected filter; that is a hypothesis to investigate, not an assumed cause. A diagnosis-only request ends with findings and the next action. An authorized fix gets checked against the original failure and relevant neighboring behavior.
+
+Hypotheses, experiment results, and ruled-out causes stay in the existing record's Approach/Evidence, with the next experiment in Next. A later session can continue without repeating disproven fixes. Small investigations need no new document; urgent containment remains labelled as mitigation until the cause is established.
+
+Inspired by the investigation and hypothesis-testing approach in [Superpowers systematic-debugging](https://github.com/obra/superpowers/blob/main/skills/systematic-debugging/SKILL.md), adapted to this collection's small records, scoped checks, and existing authorization. It introduces no fixed retry quota, mandatory architecture discussion, or additional runtime dependency.
+
+If both collections are installed, the agent should select the debugging procedure from the active workflow and existing user/project preferences: `spec-debug` for this workflow, or `systematic-debugging` for Superpowers. It should not ask you to select one for every failure or run both procedures for the same investigation. Automatic discovery remains agent-driven; this guidance does not impose a host-level precedence rule between installed skills.
 
 ## Feedback grounded in the project
 
@@ -254,7 +277,7 @@ Our deliberate simplifications are one normal change file, three entry points, i
 
 ## Keeping the workflow lean
 
-- Keep three workflow actions and one supporting feedback skill. Load each skill body and its references only when needed.
+- Keep three workflow actions, with feedback and debugging guidance loaded when needed. Load each skill body and its references only when needed.
 - Each skill separates mandatory rules from numbered process steps. A little repeated record-selection and path guidance keeps each entry point usable on its own; shared-reference generation would add another layer to maintain and load.
 - Read the selected change, affected specs, and relevant code; search before reading whole directories. Load supporting references only when needed.
 - Keep one source for each fact: intended change in the active record, current contract in baseline specs, implementation in code.
@@ -298,13 +321,13 @@ Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#w
 
 Copy mode is the default and includes supporting references. Rerun installation after updating this checkout. Symlink mode requires the checkout to remain at the same path; use copy mode for a portable project. Restart the agent if newly installed skills do not appear.
 
-Installation replaces destination folders with matching skill names, so preserve local edits before reinstalling. Other skill names are untouched. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the five included skills. With no scope argument, the scripts offer an interactive local/global choice.
+Installation replaces destination folders with matching skill names, so preserve local edits before reinstalling. Other skill names are untouched. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the six included skills. With no scope argument, the scripts offer an interactive local/global choice.
 
 Earlier versions incorrectly installed global Codex skills under `~/.gemini/config/skills/`. Reinstall to the corrected path. The scripts leave that legacy location untouched; remove only the old copies you recognize if they are no longer needed.
 
 ### Claude Code marketplace alternative
 
-The `dev-skills` plugin contains the same three workflow skills, `spec-feedback`, and `cmd-remote`:
+The `dev-skills` plugin contains the same three workflow skills, `spec-feedback`, `spec-debug`, and `cmd-remote`:
 
 ```text
 /plugin marketplace add JNSFilipe/skills
@@ -321,7 +344,7 @@ Use `/dev-skills:spec-apply`, `/dev-skills:spec-plan`, and `/dev-skills:spec-clo
 ./uninstall.sh --global
 ```
 
-Uninstallation removes the five included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
+Uninstallation removes the six included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
 
 ## Maintaining this repository
 
