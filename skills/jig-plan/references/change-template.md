@@ -1,11 +1,13 @@
 # Compact change record
 
-Use the shape below, replacing the instructional text with project facts. Omit optional sections that add nothing. Paths in the record are repository-relative so they remain valid after archiving or switching agents. Status is informational: `planned`, `in-progress`, `blocked`, or `complete`.
+Use the shape below, replacing the instructional text with project facts. Omit optional sections that add nothing. Paths in the record are repository-relative so they remain valid after archiving or switching agents. Status describes work, not session execution: `planned`, `in-progress`, `implemented`, `blocked`, `complete`, `cancelled`, or `unknown`. Follow [the shared memory contract](memory.md) for the separate session lifecycle and stable links.
 
 ```markdown
 # <Change title>
 
 Status: planned
+Work ID: <stable ID shared with the session receipt>
+Origin: <plan-led, independent apply, or other recorded origin>
 
 ## Why / scope
 <Problem and intended outcome. Relevant exclusions.>
@@ -44,4 +46,4 @@ For multiple capabilities, group requirements by target. Do not create baseline 
 
 An existing local plan can serve as the record if it has the same information. Keep one authoritative task list on disk, with enough intent to resume without an external service or prior chat. Version control is optional.
 
-Checkpoint at a substantial plan-to-build transition, before a context reset, and when pausing. Record decisions that otherwise exist only in chat and distinguish completed, failed, and unrun checks. Keep this concise; no extra handoff document is required. If a worker was used, retain a short execution note in Evidence (model when known, task, outcome, and any escalation) so retries do not repeat an unsuccessful approach.
+Checkpoint at a substantial plan-to-build transition, before a context reset, and when pausing. Record decisions that otherwise exist only in chat and distinguish completed, failed, and unrun checks. Keep the shared receipt linked to the current work-record path, including after archiving; finalize its Session status separately from this work Status and read both back before the final response. Keep this concise; no extra handoff document is required. If a worker was used, retain a short execution note in Evidence (model when known, task, outcome, and any escalation) so retries do not repeat an unsuccessful approach.

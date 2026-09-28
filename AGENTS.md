@@ -1,6 +1,7 @@
 # Repository maintenance
 
 - Edit canonical skills under `skills/`; generate `plugins/jig/skills/` with `python3 scripts/sync-plugin.py`. Keep standalone skills self-contained and the workflow lightweight.
+- Shared memory and context instructions are canonical in `skills/_shared/`. Sync bundles them into each skill's `references/` before generating the plugin; never edit those bundled copies. Every skill must link to and follow the bundled memory contract, which routes to the context policy.
 - Canonical skill directories and `name:` values carry the `jig-` prefix; sync strips it for the plugin, which supplies its own namespace, and rewrites cross-references between skills. Refer to sibling skills as `jig-<name>/SKILL.md` so the rewrite finds them, and never edit the generated copies.
 - For a release, change the version only in `plugins/jig/.claude-plugin/plugin.json`; sync updates the marketplace copies. Do not bump versions for every intermediate edit.
 - After edits, run `python3 scripts/sync-plugin.py`, `python3 -m unittest discover -s tests -v`, and `bash -n install.sh uninstall.sh`. The tests include the read-only sync/version check; CI also runs it explicitly.

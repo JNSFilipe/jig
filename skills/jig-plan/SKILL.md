@@ -7,7 +7,11 @@ description: Plan or refine a feature, behavior change, or substantial refactor 
 
 Leave enough intent on disk for another agent to implement without reconstructing the conversation.
 
+Read and follow [the shared memory contract](references/memory.md) before starting. Reuse it across nested skills. Record even a small chat plan in the shared session receipt; a project plan file remains optional for trivial work.
+
 ## Rules
+
+For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
 
 - **Respect the request.** Planning-only work ends with the plan. A request that also includes implementation can continue without another approval gate.
 - **Keep intent explicit.** Resolve decisions that materially change behavior, compatibility, scope, or cost before treating the plan as executable.
@@ -20,7 +24,7 @@ Leave enough intent on disk for another agent to implement without reconstructin
 
 Read existing project instructions and the relevant code, tests, and specs. Reuse decisions from the conversation and infer routine implementation choices from the project. Investigate in code before asking the user.
 
-For an obvious localized fix with no design decision, give a short plan in chat; create a record only if requested. Keep any affected existing spec accurate. For substantive work, identify the smallest useful outcome. Split outcomes only when they can be delivered independently.
+For an obvious localized fix with no design decision, give a short plan in chat and save its scope and next step in the session receipt; create a separate project record only if requested. Keep any affected existing spec accurate. For substantive work, identify the smallest useful outcome. Split outcomes only when they can be delivered independently.
 
 ### 2. Select or create the record
 
@@ -46,6 +50,6 @@ Before leaving substantial planning, preserve decisions that otherwise exist onl
 
 If the host signals context pressure or obsolete decisions repeatedly confuse the task, use an authorized exposed compaction control after checkpointing. Otherwise recommend the host action once with the record path and resume prompt; continue feasible planning. Saving a checkpoint is not proof of a reset.
 
-If `jig-feedback` is installed, read its `SKILL.md` directly for decision and handoff guidance, reusing it if already loaded. Otherwise state intended behavior, outstanding decisions, and the record path.
+Use the feedback reporting procedure to present intended behavior, outstanding decisions, and the current record path.
 
-For planning-only work, stop. When implementation is authorized, continue with `jig-apply` when available, or implement from the record. Leave unresolved product decisions with the planning agent; a cheaper worker needs a settled task.
+For planning-only work, finalize and read back the receipt: a delivered executable plan completes the planning session while its work remains `planned`; record unresolved decisions as blockers. When implementation is authorized, continue with `jig-apply` when available using the same receipt and Work ID, or implement from the record. Leave unresolved product decisions with the planning agent; a cheaper worker needs a settled task.

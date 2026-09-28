@@ -7,7 +7,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILLS = {"jig-plan", "jig-apply", "jig-close", "jig-feedback", "jig-debug", "jig-remote"}
+SKILLS = {"jig-plan", "jig-apply", "jig-close", "jig-feedback", "jig-debug", "jig-remote", "jig-crunch", "jig-polish", "jig-status", "jig-consistency", "jig-guardrails"}
 
 
 class InstallationTests(unittest.TestCase):
@@ -38,6 +38,12 @@ class InstallationTests(unittest.TestCase):
             for name in SKILLS:
                 self.assertEqual((parent / name / "SKILL.md").read_bytes(),
                                  (ROOT / "skills" / name / "SKILL.md").read_bytes())
+                self.assertEqual((parent / name / "references/memory.md").read_bytes(),
+                                 (ROOT / "skills/_shared/memory.md").read_bytes())
+                self.assertEqual((parent / name / "references/context.md").read_bytes(),
+                                 (ROOT / "skills/_shared/context.md").read_bytes())
+            self.assertEqual((parent / "jig-guardrails/agents/openai.yaml").read_bytes(),
+                             (ROOT / "skills/jig-guardrails/agents/openai.yaml").read_bytes())
             self.assertTrue((parent / "jig-plan/references/change-template.md").is_file())
             self.assertEqual(
                 (parent / "jig-apply/references/context-and-execution.md").read_bytes(),

@@ -7,9 +7,13 @@ description: Verify a change against its requirements, reconcile durable specs, 
 
 Reconcile intended behavior, implementation, and the written contract.
 
+Read and follow [the shared memory contract](references/memory.md) before starting. Reuse the enclosing receipt or open a new linked closeout receipt; explicit no-writes requests suppress receipt writes too.
+
 ## Rules
 
-- **Review-only means no edits.** Report findings without changing code, specs, task state, or archive files.
+For progress, findings, decision questions, completion, and handoffs, read `feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+
+- **Review-only means no work edits.** Report findings without changing code, specs, task state, or archive files. Only the review's observation receipt may be written, unless the user requires no writes at all.
 - **Completion requires evidence.** Incomplete scope, failing/unavailable required checks, and unresolved spec conflicts keep the change active.
 - **Preserve the contract.** Never rewrite intended behavior to conceal a defect or discard unrelated requirements and scenarios.
 - **Preserve history.** Never overwrite an archive entry.
@@ -47,8 +51,10 @@ Check the resulting specs against verified implementation. Create specs only for
 
 ### 4. Archive and report
 
-After verification and reconciliation succeed, record final evidence, mark complete, and move the record to `docs/changes/archive/YYYY-MM-DD-<name>.md` or the existing convention. Use a distinct suffix on collision and preserve contents and working links.
+After verification and reconciliation succeed, save the evidence with work `implemented`, then move the record to `docs/changes/archive/YYYY-MM-DD-<name>.md` or the existing convention. Only after the move succeeds, mark the archived work complete and update the receipt. Use a distinct suffix on collision and preserve contents and working links.
+
+Keep the Work ID stable and set the receipt's Work record to the actual archive path. Complete both work and session only after reconciliation and archiving succeed; clear resolved blockers and obsolete Next entries. Read back the receipt and archived record before reporting. If interrupted between operations, inspect both locations on recovery; record the remaining step as blocked or paused without duplicating the archive. Receipt-only work needs no new project archive. A finished review finalizes its observation receipt, not the reviewed work's lifecycle.
 
 Keep reconciliation and archiving together as one local operation. If interrupted, inspect current state and perform only the remaining edits.
 
-For the final report, read an installed `feedback/SKILL.md` directly when useful, reusing it if already loaded. Otherwise state delivered behavior, meaningful check results, limitations, and the final spec/archive paths.
+Use the feedback reporting procedure for the final report, including delivered behavior, meaningful check results, limitations, and the final spec/archive paths.

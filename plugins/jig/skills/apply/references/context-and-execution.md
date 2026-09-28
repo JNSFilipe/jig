@@ -1,10 +1,12 @@
 # Context and execution
 
-Use apply's situation/action table for routine context decisions. Read this reference when carrying out a handoff/reset or responding to a requested transition; reuse it once loaded.
+Use apply's situation/action table together with [the shared context policy](context.md) for routine context decisions, reminders, and host command names. Read this reference for implementation-worker mechanics when carrying out a handoff/reset or responding to a requested transition; reuse it once loaded.
 
 ## 1. Save a checkpoint
 
 Update the existing record with decisions, relevant paths, completed/pending work, actual checks, and the next bounded action. Include active worker/process ownership and the stop condition in Next; reference other sections instead of duplicating them. Finish or stop active operations before replacing their context. After a transition, inspect current files before resuming.
+
+Follow [the shared memory contract](memory.md): checkpoint the same receipt and Work ID, keep its owner accurate, and finalize as paused if execution is being relinquished. Compaction during continuing execution does not create a new session. Pass the receipt path and ownership boundary to the next agent; only the current primary owner writes it.
 
 ## 2. Choose the transition
 
@@ -26,12 +28,13 @@ Use a native write-capable worker with fresh history and access to the actual pr
 Send actual paths and constraints, not the planning transcript:
 
 ```text
-Work in <project root>. Read project instructions, <record>, and
+Work in <project root>. Read project instructions, <record>, <session receipt>, and
 <apply SKILL.md>. You are the implementation worker.
 Implement <outcome>; read <paths>; edit only <scope>.
 Follow the recorded decisions and scenarios; run <checks>.
 Update assigned tasks/evidence. Stop at <boundary>.
-Do not redelegate, reconcile baseline specs, archive, or publish.
+Do not create/finalize session receipts, redelegate, reconcile baseline specs,
+archive, or publish. The parent owns receipt writes.
 Return changed files, actual check results, and blockers.
 ```
 

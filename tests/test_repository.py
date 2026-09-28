@@ -2,6 +2,7 @@
 
 import json
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -13,6 +14,44 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class RepositoryTests(unittest.TestCase):
+    def test_reporting_dependency_resolves_in_standalone_and_plugin_skills(self):
+        for base, prefix in ((ROOT / "skills", "jig-"), (ROOT / "plugins/jig/skills", "")):
+            feedback = f"{prefix}feedback/SKILL.md"
+            for entrypoint in base.glob("*/SKILL.md"):
+                if entrypoint.parent.name == f"{prefix}feedback":
+                    continue
+                with self.subTest(skill=str(entrypoint)):
+                    references = re.findall(r"`([^`]+/SKILL\.md)`", entrypoint.read_text())
+                    self.assertIn(feedback, references)
+                    self.assertTrue((base / feedback).is_file())
+
+    def test_every_skill_can_reach_its_bundled_memory_contract(self):
+        shared = (ROOT / "skills/_shared/memory.md").read_bytes()
+        context = (ROOT / "skills/_shared/context.md").read_bytes()
+        memory_links = re.findall(r"\]\(([^)]+)\)", shared.decode())
+        self.assertIn("context.md", memory_links)
+        for entrypoint in (ROOT / "skills").glob("*/SKILL.md"):
+            with self.subTest(skill=entrypoint.parent.name):
+                links = re.findall(r"\]\(([^)]+)\)", entrypoint.read_text())
+                self.assertIn("references/memory.md", links)
+                self.assertEqual((entrypoint.parent / "references/memory.md").read_bytes(), shared)
+                self.assertEqual((entrypoint.parent / "references/context.md").read_bytes(), context)
+                plugin = ROOT / "plugins/jig/skills" / entrypoint.parent.name.removeprefix("jig-")
+                self.assertEqual((plugin / "references/memory.md").read_bytes(), shared)
+                self.assertEqual((plugin / "references/context.md").read_bytes(), context)
+
+    def test_guardrails_routes_resolve_after_plugin_rewrite(self):
+        for base, name, prefix in ((ROOT / "skills", "jig-guardrails", "jig-"),
+                                   (ROOT / "plugins/jig/skills", "guardrails", "")):
+            text = (base / name / "SKILL.md").read_text()
+            routes = re.findall(r"`([a-z-]+/SKILL\.md)`", text)
+            for target in ("apply", "plan", "close", "debug", "crunch", "polish",
+                           "remote", "status", "feedback", "consistency"):
+                relative = f"{prefix}{target}/SKILL.md"
+                with self.subTest(distribution=str(base), target=target):
+                    self.assertIn(relative, routes)
+                    self.assertTrue((base / relative).is_file())
+
     def test_distribution_is_synchronized(self):
         result = subprocess.run([sys.executable, str(ROOT / "scripts/sync-plugin.py"), "--check"],
                                 capture_output=True, text=True)
@@ -57,6 +96,35 @@ class SyncTests(unittest.TestCase):
         self.assertNotIn("jig-", distributed)
         self.assertFalse((self.root / "plugins/jig/skills/jig-apply").exists())
 
+    def test_shared_source_updates_every_standalone_and_plugin_copy(self):
+        source = self.root / "skills/_shared/memory.md"
+        updated = source.read_bytes() + b"\nShared contract revision for this fixture.\n"
+        source.write_bytes(updated)
+        before = {path: path.read_bytes() for path in self.root.rglob("memory.md")}
+        self.assertIn("shared reference", self.sync("--check", success=False))
+        for path, content in before.items():
+            self.assertEqual(path.read_bytes(), content)
+        self.sync()
+        for entrypoint in (self.root / "skills").glob("*/SKILL.md"):
+            self.assertEqual((entrypoint.parent / "references/memory.md").read_bytes(), updated)
+            plugin = self.root / "plugins/jig/skills" / entrypoint.parent.name.removeprefix("jig-")
+            self.assertEqual((plugin / "references/memory.md").read_bytes(), updated)
+        self.sync("--check")
+
+    def test_shared_bundle_drift_is_detected_without_writes_and_repaired(self):
+        bundled = self.root / "skills/jig-status/references/memory.md"
+        bundled.write_text("stale bundle")
+        self.assertIn("shared reference", self.sync("--check", success=False))
+        self.assertEqual(bundled.read_text(), "stale bundle")
+        self.sync()
+        self.assertEqual(bundled.read_bytes(), (self.root / "skills/_shared/memory.md").read_bytes())
+        bundled.unlink()
+        self.sync("--check", success=False)
+        self.assertFalse(bundled.exists())
+        self.sync()
+        self.assertTrue(bundled.is_file())
+        self.sync("--check")
+
     def test_manifest_version_drives_marketplace_without_changing_other_fields(self):
         manifest_path = self.root / "plugins/jig/.claude-plugin/plugin.json"
         manifest = json.loads(manifest_path.read_text())
@@ -76,6 +144,9 @@ class SyncTests(unittest.TestCase):
     def test_plugin_only_work_is_preserved(self):
         extra = self.root / "plugins/jig/skills/plan/private-note.md"
         extra.write_text("preserve this")
+        bundled = self.root / "skills/jig-status/references/memory.md"
+        bundled.write_text("preserve until preflight succeeds")
         self.assertIn("Plugin-only", self.sync("--check", success=False))
         self.sync(success=False)
         self.assertEqual(extra.read_text(), "preserve this")
+        self.assertEqual(bundled.read_text(), "preserve until preflight succeeds")

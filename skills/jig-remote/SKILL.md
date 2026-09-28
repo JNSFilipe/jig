@@ -7,7 +7,11 @@ description: Run SSH commands on a remote device in a local tmux pane the user c
 
 Use local tmux to keep a visible terminal for the target. SSH targets need a compatible shell for the marker loop; they need no remote tmux unless work must survive losing SSH.
 
+Read and follow [the shared memory contract](references/memory.md) before starting. Reuse the enclosing receipt or create a standalone one with the actual project/target; inspections use observation mode and configuration changes use implementation mode.
+
 ## Rules
+
+For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
 
 - **Keep commands reviewable.** State the target and intended operation. Apply host execution permissions to both transport and payload; tmux grants no additional authority and must not bypass a rejected command.
 - **Pin ownership to a pane.** Inspect before sending and use its stable pane ID, never whichever pane is active. One writer at a time; a session name alone verifies neither host nor readiness.
@@ -45,6 +49,8 @@ Stop sending when credentials, an unexpected program, or uncertain ownership app
 ### 4. Leave recoverable state
 
 Leave the user's session available. Stop only the logging this task owns when finished. For a handoff, preserve the target, socket if nondefault, pane ID, log path, pending command/nonce, and observed state in the existing task record.
+
+Save recovery details in the owned shared receipt when there is no writable task record. Finalize and read back memory before leaving: an idle retained pane is not pending execution, and a missing completion marker is not success. A handed-off job needs `paused` session state plus its observed running/unknown state, owner, and next probe. Keep secrets out of recovery notes; never finalize an enclosing implementation merely because one remote command finished.
 
 If SSH drops, remote work may terminate or continue. Determine its state before repeating work. Local tmux preserves the local terminal, not remote process lifetime. Jobs that must survive need an available remote supervisor or remote tmux/screen session, with verified job status.
 

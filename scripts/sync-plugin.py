@@ -25,20 +25,34 @@ def distributed_name(name):
     return name[len(PREFIX):] if name.startswith(PREFIX) else name
 
 
-def distribute(root):
+def shared_references(root):
+    """Bundle shared instructions into each standalone skill without symlinks."""
+    shared = root / "_shared"
+    return {
+        Path(skill.name) / "references" / path.relative_to(shared): path.read_bytes()
+        for skill in canonical_skills(root)
+        for path in sorted(shared.rglob("*.md"))
+    }
+
+
+def distribute(root, shared):
     """Expected plugin contents: unprefixed directories and rewritten references."""
     skills = canonical_skills(root)
     prefixed = [skill.name for skill in skills if skill.name.startswith(PREFIX)]
-    expected = {}
+    sources = {}
     for skill in skills:
         for path in sorted(skill.rglob("*")):
             if not path.is_file() or path.name == ".DS_Store" or "__pycache__" in path.parts:
                 continue
-            text = path.read_text()
-            for name in prefixed:
-                text = text.replace(name, distributed_name(name))
-            relative = Path(distributed_name(skill.name)) / path.relative_to(skill)
-            expected[relative] = text.encode()
+            sources[Path(skill.name) / path.relative_to(skill)] = path.read_bytes()
+    sources.update(shared)
+    expected = {}
+    for path, data in sources.items():
+        text = data.decode()
+        for name in prefixed:
+            text = text.replace(name, distributed_name(name))
+        relative = Path(distributed_name(path.parts[0]), *path.parts[1:])
+        expected[relative] = text.encode()
     return expected
 
 
@@ -68,27 +82,38 @@ def main():
     if len(entries) != 1:
         parser.error("Marketplace must contain exactly one entry matching the plugin name")
     version_drift = (marketplace.get("version") != version or entries[0].get("version") != version)
-    expected = distribute(ROOT / "skills")
+    source_root = ROOT / "skills"
+    shared = shared_references(source_root)
+    shared_changed = sorted(path for path, data in shared.items()
+                            if not (source_root / path).is_file()
+                            or (source_root / path).read_bytes() != data)
+    expected = distribute(source_root, shared)
     destination = PLUGIN / "skills"
     existing = present(destination)
     changed = sorted(path for path, data in expected.items()
                      if path not in existing or existing[path].read_bytes() != data)
     extra = sorted(set(existing) - set(expected))
     if args.check:
+        for path in shared_changed:
+            print(f"Missing or different shared reference: skills/{path}")
         for path in changed:
             print(f"Missing or different: {path}")
         for path in extra:
             print(f"Plugin-only file: {path}")
         if version_drift:
             print(f"Marketplace version differs from plugin manifest: expected {version}")
-        if not changed and not extra and not version_drift:
+        if not changed and not shared_changed and not extra and not version_drift:
             print(f"Plugin matches {len(expected)} canonical skill files; version {version} is synchronized.")
-        return int(bool(changed or extra or version_drift))
+        return int(bool(changed or shared_changed or extra or version_drift))
     # Do not silently remove plugin-only work. Inspect it before a deliberate deletion.
     if extra:
         for path in extra:
             print(f"Resolve plugin-only file before syncing: {path}")
         return 1
+    for path in shared_changed:
+        target = source_root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(shared[path])
     destination.mkdir(parents=True, exist_ok=True)
     for path in changed:
         target = destination / path
@@ -98,7 +123,8 @@ def main():
         marketplace["version"] = entries[0]["version"] = version
         marketplace_path.write_text(json.dumps(marketplace, indent=2) + "\n")
         print(f"Synced marketplace version to {version}.")
-    print(f"Synced {len(changed)} files; {len(expected)} canonical skill files total.")
+    print(f"Synced {len(shared_changed)} shared references and {len(changed)} plugin files; "
+          f"{len(expected)} canonical skill files total.")
     return 0
 
 

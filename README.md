@@ -8,16 +8,21 @@ A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/
 
 | Skill | What it does | When to use it | Result |
 | --- | --- | --- | --- |
+| [jig-guardrails](skills/jig-guardrails/SKILL.md) | Routes ordinary requests to the appropriate workflow and gives plan/close/context reminders. | You omit a skill name, want help choosing the next step, or need context guidance. | The selected workflow runs within your request; reminders include a concrete next action and checkpoint when needed. |
+| [jig-consistency](skills/jig-consistency/SKILL.md) | Audits memory links, session/work states, ownership, and evidence freshness. | You want a memory consistency check, optionally scoped to a project, session, or Work ID. | Evidence-backed discrepancies and coverage limits; repairs only when requested. |
+| [jig-status](skills/jig-status/SKILL.md) | Inventories the repository's plans, independent applies, crunch sessions, and polish follow-ups, including archives. | You want to know what has been implemented and what remains across the repo. | An overview with record links, implementation and verification states, blockers, and coverage gaps; only its own observation receipt is saved. |
+| [jig-crunch](skills/jig-crunch/SKILL.md) | Implements the smallest working feature with minimal investigation, ceremony, and token use. Delegates only when both time and total tokens should improve. | You want a fast-and-dirty implementation and accept documented shortcuts. | Working code, focused and required checks, and a persistent session memory record. |
+| [jig-polish](skills/jig-polish/SKILL.md) | Refines a referenced crunch implementation using recorded shortcuts and optional instructions. | You want to improve a crunch result's correctness, tests, or maintainability. | Verified improvements and a linked follow-up record preserving the original session history. |
 | [jig-plan](skills/jig-plan/SKILL.md) | Investigates the code and captures scope, behavior scenarios, implementation approach, and verifiable tasks. | You want to settle or review an approach before implementation. | A small local change record, or a chat plan for a trivial fix. Planning-only requests stop here. |
 | [jig-apply](skills/jig-apply/SKILL.md) | Plans as needed, implements in checked slices, records progress, and continues through closeout. Manages context and execution handoffs when supported and worthwhile. | You want to build a feature, fix a bug, or resume an existing plan. | Verified code and updated specs/archive when complete; a resumable record when blocked or paused. |
-| [jig-close](skills/jig-close/SKILL.md) | Verifies implementation against requirements, reconciles affected specs, and archives completed work. Also supports verification-only review. | Implementation is ready for closeout, or you want an independent review of its evidence. | Updated baseline specs and an archive record, or findings explaining why the change remains active. Review-only requests leave files unchanged. |
+| [jig-close](skills/jig-close/SKILL.md) | Verifies implementation against requirements, reconciles affected specs, and archives completed work. Also supports verification-only review. | Implementation is ready for closeout, or you want an independent review of its evidence. | Updated baseline specs and an archive record, or findings explaining why the change remains active. Reviews leave project work unchanged and save an observation receipt. |
 | [jig-feedback](skills/jig-feedback/SKILL.md) | Uses the change record, relevant code, and actual checks to explain progress, findings, decisions, or a handoff. | You ask “what's done?”, “what's next?”, or need a decision or completion summary. | An evidence-based answer with useful file links; no additional report file is required. |
 | [jig-debug](skills/jig-debug/SKILL.md) | Reproduces a failure, traces its cause, tests a hypothesis, and verifies an authorized correction. | A bug is unexplained, intermittent, or persists after a fix; you want diagnosis or diagnosis and repair. | Evidence-backed findings or a verified correction, with investigation notes in the existing change record when needed. |
 | [jig-remote](skills/jig-remote/SKILL.md) | Runs remote commands through SSH, using a verified local tmux pane when shared visibility or interaction is useful. | You need to inspect or work on a device, watch execution, or reuse an authenticated session. | Observed command results and a reusable terminal session when needed. It is independent of the change workflow. |
 
 ## Quick start
 
-Install the three workflow skills, `jig-feedback`, `jig-debug`, and the companion `jig-remote` skill into a project for both tools:
+Install all included skills into a project for both tools:
 
 ```bash
 ./install.sh --local /path/to/project
@@ -27,11 +32,16 @@ Then, in your coding agent's chat:
 
 | Intent | Codex | Claude Code |
 | --- | --- | --- |
+| Choose the workflow for me | `$jig-guardrails Add CSV export for the filtered orders` | `/jig-guardrails Add CSV export for the filtered orders` |
+| Audit memory consistency | `$jig-consistency` | `/jig-consistency` |
+| See all repository work | `$jig-status` | `/jig-status` |
+| Crunch a feature quickly | `$jig-crunch Add CSV export for the filtered orders` | `/jig-crunch Add CSV export for the filtered orders` |
+| Polish a crunch result | `$jig-polish <session-reference> Focus on error handling and tests` | `/jig-polish <session-reference> Focus on error handling and tests` |
 | Run a change through completion | `$jig-apply Add CSV export for the filtered orders` | `/jig-apply Add CSV export for the filtered orders` |
 | Plan without implementing | `$jig-plan Add CSV export for the filtered orders` | `/jig-plan Add CSV export for the filtered orders` |
 | Implement or resume a plan | `$jig-apply docs/changes/add-order-export.md` | `/jig-apply docs/changes/add-order-export.md` |
 | Verify, update specs, and archive | `$jig-close add-order-export` | `/jig-close add-order-export` |
-| Review without changing files | `$jig-close add-order-export; verification only` | `/jig-close add-order-export; verification only` |
+| Review without any writes | `$jig-close add-order-export; verification only, no writes` | `/jig-close add-order-export; verification only, no writes` |
 
 These are chat invocations, not shell commands. Codex's `$` skill mentions and Claude Code's slash invocations are documented in their [skill guides](https://learn.chatgpt.com/docs/build-skills) and [Claude Code skills documentation](https://code.claude.com/docs/en/skills).
 
@@ -47,7 +57,24 @@ Codex and direct Claude Code installs share one flat namespace, so the skills ca
 
 `skills/` is canonical and always prefixed. `scripts/sync-plugin.py` strips the prefix when generating `plugins/jig/`, rewriting the references between skills to match. Do not edit the generated copies.
 
+### Guardrails when you forget the commands
+
+Ordinary requests such as “Add a download button” now match `jig-apply` directly, even without a prior plan. `jig-guardrails` can choose the workflow when no skill was named: implement through apply, explore through plan, diagnose through debug, and preserve explicit crunch/polish/review choices. It announces the choice and proceeds instead of asking you to repeat a clear request. A planning-only request gets an apply continuation prompt; apply normally closes its own work. If work stops before required closeout, the reminder includes the blocker and the appropriate close prompt. Finished work gets no redundant close reminder.
+
+Normal implicit discovery remains enabled. It depends on the host matching skill descriptions; an unloaded skill cannot remind you about itself. [OpenAI documents both explicit and implicit skill selection](https://learn.chatgpt.com/docs/build-skills). For more reliable routing, you can add this optional preference to existing personal instructions or the project's agent instructions:
+
+```text
+For coding change requests, use the installed jig-guardrails skill even when
+I omit a skill name. Preserve explicit workflow choices and read-only requests.
+```
+
+For the Claude Code plugin, name `jig:guardrails` instead. The installer does not modify personal/project instructions, install hooks, or require this setup. If an installed skill needs an explicit host invocation, routing gives one paste-ready prompt. If it is missing, routing identifies the dependency and uses a scoped fallback where possible; repeating a prompt cannot install a skill.
+
 ## The workflow
+
+For speed-first work, invoke `jig-crunch` (`/jig:crunch` with the plugin). It uses direct patches and minimal ceremony, accepts rough code, and still follows project requirements and checks the requested behavior. Each invocation records its result, checks, shortcuts, and remaining work in the shared `~/.local/share/jig/sessions/` registry by default. Records survive chat resets and skill reinstalls; only relevant records are read when resuming. This is an alternative to the plan/apply/close workflow below.
+
+Follow with `$jig-polish <session-reference> [instructions]` (`/jig:polish` with the plugin). The reference can be the crunch record's path, filename, or recorded session ID. For example, `$jig-polish <session-reference> Remove duplication and add regression tests; keep the API unchanged`. Without additional instructions, polish addresses the recorded shortcuts and concrete weaknesses in the current implementation. It preserves the original crunch history and saves a linked follow-up in the shared registry with the same Work ID, including verification and remaining debt. Older crunch registries and nested polish records remain readable without migration.
 
 ```mermaid
 flowchart LR
@@ -67,7 +94,7 @@ These are actions you can revisit. You do not have to type all three commands.
 2. **Apply one working slice.** Implement an observable outcome through the layers it needs, check it, and record the result. Update the same plan when the approach changes. A clear implementation request continues without repeated plan approvals.
 3. **Close with evidence.** Compare requirements with code and checks, reconcile the affected baseline specs, then archive the record. Failed or unavailable required checks leave the change active with a precise next step.
 
-A tiny fix can go straight to editing and an appropriate check, with no new record. An existing spec still gets corrected if its contract changes. Add a separate design document only when technical decisions or migration details need the space. When you request test-first development, the same implementation skill runs a red-green-refactor loop, one behavior at a time.
+A tiny fix can go straight to editing and an appropriate check, with a compact session receipt instead of a new project document. An existing spec still gets corrected if its contract changes. Add a separate design document only when technical decisions or migration details need the space. When you request test-first development, the same implementation skill runs a red-green-refactor loop, one behavior at a time.
 
 Completion means verified in the current project files. Committing, pushing, merging, and deploying follow the user's separate request and project rules.
 
@@ -115,7 +142,7 @@ For diagnosis and repair, replace the last line with “Find and fix the cause, 
 
 The agent establishes the reproduction, compares the working case, and tests a specific explanation before proposing a correction. For this example it might inspect whether the exporter receives the selected filter; that is a hypothesis to investigate, not an assumed cause. A diagnosis-only request ends with findings and the next action. An authorized fix gets checked against the original failure and relevant neighboring behavior.
 
-Hypotheses, experiment results, and ruled-out causes stay in the existing record's Approach/Evidence, with the next experiment in Next. A later session can continue without repeating disproven fixes. Small investigations need no new document; urgent containment remains labelled as mitigation until the cause is established.
+Hypotheses, experiment results, and ruled-out causes stay in the writable existing record's Approach/Evidence, with the next experiment in Next. Diagnosis-only findings go in the session receipt without changing the inspected work record. A later session can continue without repeating disproven fixes. Small investigations need no separate project document; urgent containment remains labelled as mitigation until the cause is established.
 
 Inspired by the investigation and hypothesis-testing approach in [Superpowers systematic-debugging](https://github.com/obra/superpowers/blob/main/skills/systematic-debugging/SKILL.md), adapted to this collection's small records, scoped checks, and existing authorization. It introduces no fixed retry quota, mandatory architecture discussion, or additional runtime dependency.
 
@@ -123,7 +150,9 @@ If both collections are installed, the agent should select the debugging procedu
 
 ## Feedback grounded in the project
 
-[jig-feedback](skills/jig-feedback/SKILL.md) supports all three actions when explaining progress, requesting a decision, or handing work over. The workflow skills read its instructions directly when needed and reuse them once loaded; this does not depend on invoking a nested skill command. Each also includes basic reporting guidance for installations without it. You do not need to invoke another step.
+For a repository-wide overview, use `$jig-status` in Codex, `/jig-status` with a direct Claude Code install, or `/jig:status` with the plugin. Optional filters include `unfinished only` and `plans only`. It lists discovered work with implementation state, verification evidence, remaining steps, and record links; linked plans and execution sessions are grouped without double-counting the change. It includes archives, shared sessions, and legacy crunch/polish memory, and saves only its own observation receipt. Reports are excluded from feature counts and never supersede implementation state. Older unrecorded work cannot be exhaustively recovered; new small applies and plans have receipts unless writes were forbidden or failed. Use `jig-feedback` for a closer look at one selected change.
+
+[jig-feedback](skills/jig-feedback/SKILL.md) is the reporting procedure for every other skill, including guardrails. Each reads it before the first progress update, finding, decision question, completion report, or handoff and reuses it thereafter. This does not spawn another agent, create another receipt, or require an extra user command. The caller retains its scope and format, so status keeps its repository table and crunch stays concise. Standalone installs without feedback use the shared freshness check and a compact direct report.
 
 For a standalone request such as “what's done?”, “how's it going?”, or “what's next?”, use `$jig-feedback Summarize docs/changes/add-order-export.md` in Codex or `/jig-feedback Summarize docs/changes/add-order-export.md` in Claude Code; plugin installs use `/jig:feedback`.
 
@@ -146,9 +175,23 @@ After installing the skills, start with `jig-plan` or `jig-apply`. The agent rea
 
 - The first substantive plan creates `docs/changes/` and its change record.
 - Successful closeout creates or updates the affected capability specs and archives the record.
-- Tiny fixes need no new workflow files.
+- Tiny fixes need no project workflow files; they use a shared session receipt.
 
 No setup skill, generated project-wide instructions, Git initialization, or baseline spec inventory is required. An ordinary folder works. Existing project conventions take precedence over the default paths.
+
+## Shared memory across skills
+
+All skills follow one [memory contract](skills/_shared/memory.md), bundled into each skill so standalone installs remain self-contained. Every top-level request saves a small session receipt under `~/.local/share/jig/sessions/`. Set `JIG_MEMORY_HOME` or establish an explicit shared root to use another location. Nested plan/apply/debug/close transitions reuse one receipt; later requests link back through Source/Previous and a stable Work ID. Existing project records keep the authoritative task list, and the receipt points to the current location after archiving. Tiny work can live entirely in its receipt.
+
+Session state and work state are separate. A planning session can be complete with work still planned; a delivered diagnosis can leave the fix pending. Before stopping, the owner updates and reads back the saved outcome, checks, blockers, current record path, and next action. Completed sessions clear their Session next; unfinished sessions become paused or blocked. Deliberately deferred polish debt stays under Work next / debt.
+
+Before substantive reports, feedback checks saved state against the latest request and relevant current files or processes. Owners reconcile writable memory and read it back; observation requests flag discrepancies without rewriting history. Evidence records retain their actual observation time and relevant revision/configuration/process basis. Changed code invalidates affected checks, and updating a receipt timestamp never refreshes an old test result. Memory is revalidated when used; external changes or crashes can still make unattended records stale, and uncertainty is reported explicitly.
+
+Status, feedback, diagnosis, and reviews record only their own observations without changing inspected work. Explicit `read-only` or `no writes` requests suppress even receipt writes. A crash may prevent finalization: later work checks ownership and evidence before classifying an abandoned session as interrupted. Age alone never proves success or safe takeover. Missing storage is reported rather than silently claiming memory was saved.
+
+Legacy `~/.local/share/jig/crunch/sessions/` records and their nested `polish/` follow-ups remain discoverable; no automatic migration overwrites history. New receipts go to the common registry. The registry is local to the machine; transfer relevant receipts with the code and project record when switching machines.
+
+For a manual memory audit, run `$jig-consistency` (`/jig:consistency` with the plugin), optionally followed by a project path, receipt path, Session ID, or Work ID. It checks links, conflicting states, ownership, and evidence freshness, and reports through feedback. The default audit changes only its own observation receipt; add `no writes` to suppress that too. To request corrections, say `$jig-consistency <reference> Reconcile confirmed inconsistencies`; ambiguous issues remain findings. Status and apply may use a bounded audit when contradictory records obstruct reporting or safe resumption, but it is not a routine extra step or an automatic repair pass.
 
 ## What stays in the project
 
@@ -214,6 +257,8 @@ Several changes can remain active. Name the intended one when resuming. Closeout
 
 The workflow now checkpoints context automatically and requests a fresh implementation worker when the available host tools support it and the task benefits. This happens inside `jig-apply`; there is no new command or setup document. The agent's [decision table](skills/jig-apply/SKILL.md#2-choose-context-and-executor) is in the skill body, so routine decisions do not depend on loading a reference. The [execution policy](skills/jig-apply/references/context-and-execution.md) supplies the details when a transition is needed.
 
+Every skill also follows the bundled [context and reminder policy](skills/_shared/context.md). At meaningful boundaries, feedback explains whether to keep context, compact it, or start fresh. A worthwhile transition reminder includes why now, the saved checkpoint path, and a paste-ready resume prompt. It does not interrupt feasible work merely to insist on a new prompt or repeat the same reminder each turn.
+
 ### When to shed context
 
 | Situation | Default behavior |
@@ -259,7 +304,7 @@ During the capability check in Codex desktop on 2026-09-07, the exposed subagent
 
 If a manual transition is needed, the agent supplies the real record path and a resume prompt such as `Use jig-apply to resume docs/changes/add-order-export.md; inspect current files and complete the next pending slice.` In the CLIs:
 
-- **Codex:** `/compact` summarizes the current chat; `/new` starts fresh; `/model` selects the model. After starting fresh, send the resume prompt. See [Codex commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli).
+- **Codex CLI:** `/compact` summarizes the current chat; `/new` starts fresh, and `/clear` starts fresh while also clearing the terminal view. `/clean` is an alias for `/stop`, which stops background terminals—it is not context cleanup. After starting fresh, send the resume prompt. Verify availability on other surfaces. See [Codex commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli).
 - **Claude Code:** `/compact` summarizes, `/clear` starts fresh, and `/model` selects the model. After clearing, send the resume prompt. See [Claude Code commands](https://code.claude.com/docs/en/commands).
 
 These are user commands, not shell commands or actions performed by writing them in a skill. The agent recommends a manual transition only when useful; unsupported automation does not become a repeated permission loop. If clean context is explicitly required and unavailable, it checkpoints and reports the necessary action instead of silently continuing with old history.
@@ -333,13 +378,13 @@ Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#w
 
 Copy mode is the default and includes supporting references. Rerun installation after updating this checkout. Symlink mode requires the checkout to remain at the same path; use copy mode for a portable project. Restart the agent if newly installed skills do not appear.
 
-Installation replaces destination folders with matching skill names, so preserve local edits before reinstalling. Other skill names are untouched. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates the six included skills. With no scope argument, the scripts offer an interactive local/global choice.
+Installation replaces destination folders with matching skill names, so preserve local edits before reinstalling. Other skill names are untouched. Previously installed standalone copies of removed skills remain until you remove those copies; reinstalling updates all included skills. With no scope argument, the scripts offer an interactive local/global choice.
 
 Earlier versions incorrectly installed global Codex skills under `~/.gemini/config/skills/`. Reinstall to the corrected path. The scripts leave that legacy location untouched; remove only the old copies you recognize if they are no longer needed.
 
 ### Claude Code marketplace alternative
 
-The `jig` plugin contains the same three workflow skills, `jig-feedback`, `jig-debug`, and `jig-remote`:
+The `jig` plugin contains all the skills listed above, with the `jig:` invocation namespace:
 
 ```text
 /plugin marketplace add JNSFilipe/jig
@@ -356,11 +401,11 @@ Use `/jig:apply`, `/jig:plan`, and `/jig:close`. The short names above apply to 
 ./uninstall.sh --global
 ```
 
-Uninstallation removes the six included skill names; it leaves other names and project specs/change records intact. Use Claude Code's plugin management for marketplace installs.
+Uninstallation removes the included skill names; it leaves other names, project specs/change records, and the external session registry intact. Use Claude Code's plugin management for marketplace installs.
 
 ## Maintaining this repository
 
-`skills/` is canonical. `plugins/jig/skills/` contains standalone copies for distribution; do not edit both independently. [AGENTS.md](AGENTS.md) holds brief maintenance instructions; [CLAUDE.md](CLAUDE.md) imports them. These files apply to this collection and are not installed into consumer projects.
+`skills/` is canonical. Edit common memory/context guidance only in `skills/_shared/`; sync bundles these files into `references/` in every skill, then generates `plugins/jig/skills/`. Do not edit bundled references or plugin copies independently. [AGENTS.md](AGENTS.md) holds brief maintenance instructions; [CLAUDE.md](CLAUDE.md) imports them. These files apply to this collection and are not installed into consumer projects.
 
 After editing skills:
 
@@ -379,6 +424,6 @@ Installer tests exercise copy/symlink installation, updates, dry runs, removal, 
 
 Remote protocol tests execute the documented sender and reader in an isolated local tmux server. They cover output boundaries, quoting, shell state, pipeline status, pane selection, pipe toggling/replacement, and missing completion. The `protocol-example` comments identify the examples; either backtick or tilde fences work, and extra named helpers are allowed. Tests require local tmux, Bash, OpenSSL, and Perl, plus permission to create a local socket; terminal tests skip when tools are absent and never connect to a device.
 
-For skill behavior, try a tiny fix, a multi-step feature, a paused change resumed in the other tool, and a closeout with a failed required check. Expect respectively: no new record, one evolving record, continuation from actual files, and an active record with a blocker. File validation and installer tests cannot prove agent behavior; evaluate real sessions before treating the workflow as a reliability guarantee.
+For skill behavior, try a tiny fix, a multi-step feature, a paused change resumed in the other tool, and a closeout with a failed required check. Expect respectively: a compact receipt, one evolving work record linked from its receipt, continuation from actual files and ownership evidence, and a blocked session with incomplete work. Also check planning-only completion, observation receipts excluded from work counts, legacy crunch/polish lookup, and interrupted-session recovery. File validation and installer tests cannot prove agent behavior or guarantee a final write after a crash; evaluate real sessions before treating the workflow as a reliability guarantee.
 
 For context/handoff behavior, also exercise a ready plan with a worker available, an unavailable reset tool, a planning-only request, an explicit same-model preference, and a repeated worker failure. Expect a bounded work order with fresh task history, an honest fallback, no implementation, preference preservation, and escalation after the focused correction. These are behavioral evaluation cases; the installer tests do not exercise live model routing or context resets.

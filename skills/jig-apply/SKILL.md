@@ -1,13 +1,17 @@
 ---
 name: jig-apply
-description: Implement or resume a change from a spec or local plan. Use when the user asks to build a planned feature, continue pending tasks, or run the lean spec workflow through completion.
+description: Implement requested features, fixes, or refactors, including small changes with no prior plan or explicit skill mention. Use for ordinary coding change requests and to resume existing work; plan as needed, verify, and complete required closeout. Preserve planning-only and review-only requests.
 ---
 
 # Apply a change
 
 Deliver the requested behavior in verified slices, with a durable record of progress.
 
+Read and follow [the shared memory contract](references/memory.md) before starting. Reuse its receipt across nested skills; record independent applies, including tiny fixes, so they remain discoverable without a prior plan.
+
 ## Rules
+
+For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
 
 - **Evidence determines completion.** Mark tasks complete only after their outcomes and checks pass. Missing dependencies and unavailable services mean unverified.
 - **Preserve intent.** Never weaken a requirement to make a failing test pass. Reconcile behavior changes with the user's direction.
@@ -23,7 +27,11 @@ Read project instructions and inspect relevant files and local edits; use versio
 
 Read the selected record, linked constraints/specs, and affected code/tests. Reconcile the user's latest instructions and check completed tasks against actual files.
 
-With no record, handle a trivial fix directly and run an appropriate check, keeping any affected existing spec accurate. For substantive work, use `jig-plan` if available; otherwise write one local record with scope, scenarios, approach, verifiable tasks, evidence, and next action. Follow existing project conventions, including OpenSpec's native schema and artifacts.
+A shared receipt can be the selected record for small work. Follow its Work ID/source chain to the latest supported progress. A request to resume an interrupted closeout authorizes finishing that closeout even if its move already succeeded; inspect active and archive paths first. This is recovery of the same work, not reopening a completed change.
+
+If contradictory memory or uncertain recorded ownership prevents safe resumption, use an installed `jig-consistency/SKILL.md` for a bounded audit of the affected chain, reusing this receipt and its owner. Return to implementation only when scope and ownership are established. This adds no blanket audit requirement or new repair authority; if unavailable, inspect the conflict directly and preserve unresolved uncertainty.
+
+With no record, identify the origin as `independent apply`, handle a trivial fix directly, and record scope, outcome, checks, and remaining work in the shared receipt, keeping any affected existing spec accurate. For substantive work, use `jig-plan` if available; otherwise write one local record with scope, scenarios, approach, verifiable tasks, evidence, and next action. Follow existing project conventions, including OpenSpec's native schema and artifacts. Internal planning does not change an independent apply's origin.
 
 ### 2. Choose context and executor
 
@@ -39,7 +47,7 @@ Reassess at the start, after a meaningful slice or long detour, and when context
 
 Read [context and execution guidance](references/context-and-execution.md) before carrying out a handoff/reset or responding to a requested transition. Reuse it once loaded. The table above guides routine decisions without loading the reference.
 
-Checkpoint before handing off or resetting. Prefer fresh task history over copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
+Checkpoint before handing off or resetting. When handing off to a fresh worker, pass the checkpoint rather than copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
 
 An assigned worker follows the work order and skips further delegation. A primary agent waits for delegated results and inspects the actual changes before closeout; it can perform independent read-only work while the worker writes.
 
@@ -59,4 +67,6 @@ Checkpoint after meaningful verified slices and when pausing. Preserve partial r
 
 An implementation worker returns its results to the parent. The primary agent reads and follows `jig-close` when available. Otherwise verify every in-scope scenario, reconcile only verified changes into the named baseline specs, and archive the record under `docs/changes/archive/YYYY-MM-DD-<name>.md`. Re-read specs before editing, preserve unrelated requirements, resolve conflicts, and choose a distinct archive name on collision. Incomplete scope or required checks keep the record active.
 
-For updates and handoffs, read an installed `jig-feedback/SKILL.md` directly when useful; reuse it if already loaded. Otherwise report working behavior, evidence, remaining limitations, and the record's current path.
+For receipt-only tiny work, finalize its work state after relevant checks and existing-spec reconciliation; no project archive is needed. For every exit, save and read back the final receipt and changed work record, including the current archive path when applicable. Clear completed tasks' blockers/next steps; use `paused` or `blocked` for unfinished execution rather than leaving the session `active`. Required closeout still pending means work is at most `implemented`.
+
+Use the feedback reporting procedure for updates, final outcomes, and handoffs, including working behavior, evidence, remaining limitations, and the record's current path.

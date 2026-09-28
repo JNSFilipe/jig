@@ -7,9 +7,13 @@ description: Use automatically when encountering a bug, test or build failure, o
 
 Find an explanation supported by evidence, then verify a focused correction within the requested scope.
 
+Read and follow [the shared memory contract](references/memory.md) before starting. Use the enclosing work record and receipt when present; standalone diagnosis or repair creates its own receipt, including for small investigations.
+
 Apply this procedure when debugging becomes necessary during ordinary work; do not wait for a skill invocation or a separate request to investigate an in-scope failure. Scale the investigation to the problem. Use the active workflow and existing user/project preferences to choose one debugging procedure when several are available.
 
 ## Rules
+
+For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
 
 - **Investigate before correcting.** Ground a proposed fix in observed evidence. Distinguish a hypothesis, an experiment, a confirmed cause, and a mitigation.
 - **Keep experiments interpretable.** Change one relevant factor at a time where practical. Remove disproven experimental changes you introduced; preserve unrelated work.
@@ -46,6 +50,8 @@ When fixing is authorized, make the smallest correction supported by the evidenc
 
 If urgent containment is authorized before the cause is established, label it a mitigation and retain the unresolved investigation. An unavailable check remains unverified.
 
-Keep hypotheses, ruled-out causes, experiments, and results in the existing record's Approach/Evidence; put the next experiment and ownership in Next before pausing or handing off. Tiny fixes need no record. If durable notes are needed and none exists, use one ordinary change record under the project's convention, normally docs/changes/. No separate debugging dossier is required.
+Keep hypotheses, ruled-out causes, experiments, and results in the writable existing record's Approach/Evidence; put the next experiment and ownership in Next before pausing or handing off. For diagnosis-only work, save findings in its observation receipt without editing the inspected work record. Tiny fixes use the shared receipt; larger standalone repairs may use one ordinary change record under the project's convention, normally docs/changes/. No separate debugging dossier is required.
+
+Finalize and read back owned memory before leaving. A completed diagnosis can leave the underlying fix pending; mitigation retains the unresolved cause and next action. A failed or unavailable required check cannot leave a repair marked complete. Nested debugging returns evidence to the owner without finalizing the whole implementation request.
 
 Return findings to the enclosing workflow or assigned parent. An authorized implementation can continue through jig-apply when installed; otherwise report the correction, evidence, and remaining work. Diagnosis alone does not authorize closeout or publication.
