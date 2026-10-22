@@ -16,7 +16,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SRC_DIR="$SCRIPT_DIR/skills"
 
 show_help() {
-  echo -e "${BOLD}Skill Installer for Claude Code & Codex${NC}"
+  echo -e "${BOLD}Skill Installer for Pi, Claude Code & Codex${NC}"
   echo "Easily install repository skills locally or globally."
   echo
   echo -e "${BOLD}Usage:${NC}"
@@ -84,7 +84,7 @@ done
 
 # If no target specified, run interactive mode
 if [ "$LOCAL" = false ] && [ "$GLOBAL" = false ]; then
-  echo -e "${BLUE}=== Skill Installer for Claude Code & Codex ===${NC}"
+  echo -e "${BLUE}=== Skill Installer for Pi, Claude Code & Codex ===${NC}"
   echo "Where would you like to install the skills?"
   echo "1) Install locally in the current project (creates .claude/ and .agents/)"
   echo "2) Install globally (creates ~/.claude/ and ~/.agents/)"
@@ -212,9 +212,9 @@ if [ "$LOCAL" = true ]; then
     install_skill "$skill" "$CLAUDE_LOCAL" "$MODE"
   done
   
-  # Codex local path
+  # Shared portable Pi/Codex local path
   CODEX_LOCAL="$ABS_LOCAL_PATH/.agents/skills"
-  echo -e "${YELLOW}Installing for Codex (.agents/skills/)...${NC}"
+  echo -e "${YELLOW}Installing for Pi and Codex (.agents/skills/)...${NC}"
   for skill in "${SKILLS[@]}"; do
     install_skill "$skill" "$CODEX_LOCAL" "$MODE"
   done
@@ -232,9 +232,9 @@ if [ "$GLOBAL" = true ]; then
     install_skill "$skill" "$CLAUDE_GLOBAL" "$MODE"
   done
   
-  # Codex global path
+  # Shared portable Pi/Codex global path
   CODEX_GLOBAL="$HOME/.agents/skills"
-  echo -e "${YELLOW}Installing for Codex (~/.agents/skills/)...${NC}"
+  echo -e "${YELLOW}Installing for Pi and Codex (~/.agents/skills/)...${NC}"
   for skill in "${SKILLS[@]}"; do
     install_skill "$skill" "$CODEX_GLOBAL" "$MODE"
   done
@@ -245,5 +245,5 @@ if [ "$DRY_RUN" = true ]; then
   echo "Dry run complete; no files changed."
 else
   echo -e "${GREEN}${BOLD}Successfully installed the workflow skills!${NC}"
-  echo 'Use /jig-apply in Claude Code or $jig-apply in Codex.'
+  echo 'Use /skill:jig-apply in Pi, /jig-apply in Claude Code, or $jig-apply in Codex.'
 fi

@@ -11,7 +11,7 @@ Read and follow [the shared memory contract](references/memory.md) before starti
 
 ## Rules
 
-For progress, findings, decision questions, completion, and handoffs, read `feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports, apply the shared memory pre-report freshness check and give the outcome, evidence, uncertainty, next action, and record path. Read `feedback/SKILL.md` for consequential decisions or complex findings and reuse it; if unavailable, report directly using those rules. Keep this skill's scope and memory owner; reporting adds no receipt or approval gate.
 
 - **Evidence determines completion.** Mark tasks complete only after their outcomes and checks pass. Missing dependencies and unavailable services mean unverified.
 - **Preserve intent.** Never weaken a requirement to make a failing test pass. Reconcile behavior changes with the user's direction.
@@ -49,7 +49,7 @@ Read [context and execution guidance](references/context-and-execution.md) befor
 
 Checkpoint before handing off or resetting. When handing off to a fresh worker, pass the checkpoint rather than copying the planning conversation. Use host pressure signals and actual confusion to judge resets, rather than invented token thresholds. If controls are unavailable, preserve state, give a useful manual recommendation once, and continue feasible work. An explicit fresh-context requirement remains binding.
 
-An assigned worker follows the work order and skips further delegation. A primary agent waits for delegated results and inspects the actual changes before closeout; it can perform independent read-only work while the worker writes.
+An assigned worker follows the work order and skips further delegation. Pi can use the optional exposed `task` tool with an available write-capable agent; follow the reference's actual pi-task contract, not Claude/Codex arguments. If unavailable or misconfigured, continue locally within user constraints. Respect current-agent-only preferences. A primary agent waits for delegated results and inspects the actual changes before closeout; independent work must not overlap worker writes. Panes do not isolate files.
 
 ### 3. Implement and check a slice
 

@@ -9,7 +9,7 @@ Help the user follow the workflow without remembering its commands. Prefer selec
 
 Read and follow [the shared memory contract](references/memory.md) before starting. Routing and nested skills share one receipt and owner. Routing a build is implementation mode, planning-only work uses planning mode, and a request only for workflow advice is observation mode. Do not create an extra guardrails work item or reset a selected work ID/origin.
 
-For progress, questions, completion, and handoffs, read `feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep the caller's scope and memory owner. If unavailable, apply the shared memory freshness check and report outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports use the shared freshness check and give outcome, evidence, uncertainty, next action, and record path. Read `feedback/SKILL.md` for consequential decisions or complex findings and reuse it; if unavailable, report directly. Keep the caller's scope and memory owner, without another receipt or approval gate.
 
 ## Route the request
 
@@ -31,7 +31,7 @@ Announce the chosen workflow briefly, then do the work. Read sibling instruction
 
 If an installed skill requires an explicit host invocation, explain that limitation and provide one paste-ready prompt carrying the user's actual request or record path in the supported syntax. If the skill is absent or unreadable, say so and identify that missing dependency; repeating its name will not install it. Use an appropriate direct fallback or continue independent safe work within scope without claiming the missing workflow was used. Do not make the user re-prompt merely because they omitted a skill name, or repeatedly advertise a missing skill.
 
-Build snippets from the actual installed skill name and host namespace: `$<installed-skill-name> <request>` in Codex, `/<installed-skill-name> <request>` for a direct Claude Code install, or `/jig:<short-name> <request>` for this plugin. Standalone names already contain the collection prefix; the plugin namespace supplies it for distributed short names. Host built-ins such as `/plan` are not substitutes for this collection's plan skill. Confirm the installed naming/host when uncertain.
+Build snippets from the actual installed skill name and host namespace: `/skill:<installed-skill-name> <request>` in Pi (e.g. `/skill:apply`), `$<installed-skill-name> <request>` in Codex, `/<installed-skill-name> <request>` for a direct Claude Code install, or `/jig:<short-name> <request>` for this plugin. Standalone names already contain the collection prefix; the plugin namespace supplies it for distributed short names. Host built-ins such as `/plan` are not substitutes for this collection's plan skill. Confirm the installed naming/host when uncertain.
 
 ## Remind at useful boundaries
 

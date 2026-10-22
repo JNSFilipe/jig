@@ -4,7 +4,9 @@ Run these examples in **local Bash**, using actual target names and the same tmu
 
 ## 1. Select a fixed pane
 
-Inspect an existing session before sending anything:
+Keep remote shell sessions/socket names independent from pi-task coding-agent sessions. Route agent delegation through `task`, one-shot commands through ordinary tools. Inspect an existing session before sending anything, including its recorded owner in the existing receipt/checkpoint; no separate ownership registry is needed. A pi-task pane is **not** an idle shell. Do not send even a readiness probe to it. Unknown ownership, an occupied agent TUI, or a pending worker rejects reuse. A process name/window title alone is not proof.
+
+Only after an explicit recorded ownership transfer, prior owner relinquishment, and observation of an idle compatible shell may it be considered for shell readiness. Preserve pending worker/terminal IDs and unresolved command state in the same receipt. Never select an arbitrary active pane.
 
 ~~~bash
 JIG_REMOTE_SESSION=cmd-pi
@@ -35,14 +37,37 @@ Let SSH authenticate first. New host fingerprints need trusted verification; cha
 
 ## 2. Probe an idle compatible shell
 
-After observing an idle Bourne-compatible shell:
+After confirming shell ownership and observing an idle Bourne-compatible shell, set these local attestations from the actual receipt and pane inspection (never guess them to make the guard pass):
 
 ~~~bash
-JIG_REMOTE_NONCE=$(openssl rand -hex 16)
-tmux send-keys -t "$JIG_REMOTE_PANE" -l \
-  "printf '\n__READY_$JIG_REMOTE_NONCE\n'"
-tmux send-keys -t "$JIG_REMOTE_PANE" Enter
-tmux capture-pane -p -J -S -50 -t "$JIG_REMOTE_PANE"
+JIG_REMOTE_OWNER=remote
+JIG_REMOTE_IDLE_PANE=$JIG_REMOTE_PANE
+~~~
+
+The guard below fails closed when these attestations are absent, task-owned, or for a different pane. They are per-operation local evidence, not a global ownership registry or automatic process detector. Refresh them after transfers/program changes; clear the idle attestation when a command is pending. Inspection still precedes every send.
+
+<!-- protocol-example: ownership-guard -->
+~~~bash
+jig_remote_shell_guard() {
+  if [ "${JIG_REMOTE_OWNER:-unknown}" != remote ] ||
+     [ -z "${JIG_REMOTE_PANE:-}" ] ||
+     [ "${JIG_REMOTE_IDLE_PANE:-}" != "$JIG_REMOTE_PANE" ]; then
+    printf '%s\n' 'Refusing input: pane is not an owned, observed idle remote shell.' >&2
+    return 2
+  fi
+}
+~~~
+
+Before the readiness probe, load the guard and call it:
+
+~~~bash
+if jig_remote_shell_guard; then
+  JIG_REMOTE_NONCE=$(openssl rand -hex 16)
+  tmux send-keys -t "$JIG_REMOTE_PANE" -l \
+    "printf '\n__READY_$JIG_REMOTE_NONCE\n'"
+  tmux send-keys -t "$JIG_REMOTE_PANE" Enter
+  tmux capture-pane -p -J -S -50 -t "$JIG_REMOTE_PANE"
+fi
 ~~~
 
 Look for the exact standalone readiness line. If absent, wait briefly and inspect again. Successful send-keys proves only delivery, not execution. The round trip establishes responsiveness, not host identity. Non-shell programs need their native protocol.
@@ -77,6 +102,7 @@ Set CMD to short, single-line shell code, then call the sender below. Stage comp
 <!-- protocol-example: sender -->
 ~~~bash
 jig_remote_send() {
+  jig_remote_shell_guard || return
   case "$CMD" in
     *$'\n'*|*$'\r'*) printf '%s\n' 'Use a script for multiline commands.' >&2; return 2 ;;
   esac

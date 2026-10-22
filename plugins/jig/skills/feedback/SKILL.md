@@ -1,76 +1,58 @@
 ---
 name: feedback
-description: Provide evidence-based reporting and memory freshness checks for every workflow skill's progress, findings, decisions, completion, and handoffs. Also answer change-specific status questions directly; status owns repository-wide inventory discovery and uses this skill to report it.
+description: Provide evidence-based progress, findings, decisions, completion, and handoffs. Answer change-specific status questions; status owns repository-wide inventory discovery. Use complex reporting guidance inside other workflows without a new receipt or approval step.
 ---
 
 # Feedback
 
-Find the evidence that answers the user's question and make the result understandable without reconstructing the work.
+Answer from evidence without making the user reconstruct the work.
 
-Read and follow [the shared memory contract](references/memory.md) before starting. Resolve work through the shared registry and project/legacy records. Standalone feedback maintains only its observation receipt; within authorized implementation, update the existing receipt instead.
+Read and follow [the shared memory contract](references/memory.md). Standalone feedback is an observation: it changes no inspected work records. Default to its own receipt; explicit blanket no-writes/read-only suppresses it. A prohibition only on editing source or inspected work records does not prohibit this receipt; do not invent a no-writes constraint. For explicitly opted-in routine ephemeral feedback, read [observation policy](references/observation-policy.md); promote consequential findings to a receipt unless writes are forbidden.
 
-## Use from another skill
+## Within another workflow
 
-Read these instructions once before the first substantive report or decision question and reuse them throughout the request. This is a reporting procedure within the calling skill, not a separate agent, invocation, approval step, or new receipt. Preserve the caller's scope, output format, brevity, and ownership. Repository status keeps its multi-change inventory; remote work keeps its target and process evidence; crunch keeps concise updates. Do not redirect a calling skill back to itself or require one selected change for a repository-wide report.
+Routine reports need only the shared freshness check and a concise outcome, evidence, uncertainty, next action, and record path. Load this procedure for consequential decisions, complex findings, or when directly requested, and reuse it. It is not another agent, request, approval gate, or receipt. Preserve the caller's scope, format, brevity, Work ID, and owner. Workers return evidence to the parent; reporting cannot close unfinished implementation.
 
-Keep memory updates with the existing owner. Workers return findings to their parent without creating or finalizing receipts. Intermediate progress reports checkpoint meaningful changes but do not complete an ongoing session. A final report follows the caller's actual exit state; reporting itself cannot close unfinished implementation or broaden write authority.
+## 1. Identify the claim and evidence
 
-## Rules
+Use the named record or established scope, including multi-item inventories and remote targets. Clarify selection only if ambiguity changes the answer. Follow project conventions; default active records are `docs/changes/`, archives under `docs/changes/archive/`, baseline specs under `docs/specs/`. Tiny work can use the request and receipt.
 
-- **Separate intent from observation.** Proposed requirements, baseline specs, checkboxes, and archive entries are not proof of current behavior.
-- **State verification honestly.** Distinguish passed, failed, not run, and stale evidence. Confirm model/context transitions before describing them as executed; savings need measurements.
-- **Keep reporting scoped.** A status-only request leaves project work records unchanged. It saves only its compact observation receipt; explicit read-only/no-writes requests suppress that too.
-- **Ask about behavior.** Resolve task numbering and document placement yourself. Questions in plans and handoffs need the same clarity as chat questions.
-
-## Process
-
-### 1. Identify the question and change
-
-Determine whether the user needs status, a finding, a decision, completion evidence, or a handoff. Use the named change or the scope established by the caller, including a repository inventory or remote target. Clarify selection only when ambiguity changes the answer; do not narrow an intentional multi-item report to one change.
-
-Follow the project's existing layout. Default active records are `docs/changes/<name>.md`; baseline specs are under `docs/specs/`, and completed records under `docs/changes/archive/`. For a tiny fix with no record, use the request, relevant files, and checks.
-
-### 2. Read only the supporting evidence
-
-| Question | Read |
+| Claim | Supporting evidence |
 | --- | --- |
-| Intended outcome or scope | Selected record: Why / scope and Behavior |
-| Progress, blocker, next action | Tasks, Evidence, and Next |
-| Existing behavior contract | The capability spec named by the record |
-| Reason for a design choice | Approach and any linked design document |
-| What actually works | Relevant code/tests and check results valid for current files |
-| What completed work delivered | Its exact archive record; current code/specs for behavior today |
-| Model or context transition | Execution notes and actual host results |
+| Intent / scope | Why, behavior, accepted decisions in selected work record |
+| Progress / next | Tasks, evidence, blockers, Next |
+| Current behavior | Relevant current code and valid check results, not checkboxes alone |
+| Existing contract | Linked baseline spec; intent is not proof of implementation |
+| Design reason | Approach and relevant design links |
+| Completed delivery | Exact archive record; current files for behavior today |
+| Context/model transition | Actual host results, not recommendations or inferred savings |
 
-Reuse inspected context while current. Search filenames or requirement names before broadening; follow only relevant links. After closeout, use the record's archive path. Rerun checks only when needed to establish missing or invalidated evidence.
+Search filenames/requirements before broadening. Read only supporting sections and links. Reuse inspected context and checks while current; rerun when evidence is missing or invalidated. Do not run a broad audit or expose secrets for a narrow report.
 
-### 3. Establish the claim
+## 2. Establish freshness
 
-Apply the shared contract's pre-report freshness check before presenting substantive state claims. Compare the latest request and current relevant files/process observations with the saved scope, task state, checks, blockers, next steps, and ownership. After a handoff, external edit, new result, or changed requirement, refresh affected evidence rather than relying on the previously loaded record. A receipt's Updated timestamp alone does not make its evidence current.
+Apply the shared **pre-report freshness check** against the latest request, files, and process state. External edits, worker results, or revised requirements invalidate affected evidence. Reconcile owned writable memory and read back updates before substantive claims; observations flag discrepancies without repairing sources. A receipt's Updated timestamp is not a new test result.
 
-When the caller owns writable work, reconcile supported changes in that work record and receipt before reporting; clear resolved blockers, invalidate affected check results, and read back changed memory. In observation/no-writes mode, preserve source records and label discrepancies or stale evidence in the report and any permitted observation receipt. If freshness cannot be established, state what was last observed and what remains unverified; do not claim completion from stale memory or run an unrequested broad audit. Avoid rereading unchanged context or rerunning still-valid checks for routine conversational updates.
+Separate passed, failed, not run, and stale checks; intent from observation; observed behavior from inference. Check the actual scenario before calling it a finding, dropping hypotheses ruled out by inspection. If current truth cannot be established, give the last observation and uncertainty rather than asserting completion.
 
-Check the concrete scenario before presenting it as a finding. Separate observed behavior from inference; if inspection rules out the suspected scenario, drop that finding. Surface disagreement between intent, files, and evidence instead of assuming completion.
+Put measurements, conditions, and sample size inside the claim. Lead with the smallest useful observed output for payload/UI/data-row decisions. Label hypothetical examples and unobserved output. Model/context changes need confirmed host results; savings need measurements.
 
-Put relevant measurements, sample size, and conditions inside the claim. If the claim would stay unchanged with different evidence, make it more specific. For a payload, UI state, or data-row decision, lead with the smallest useful observed output and explain it afterward. Use an available read-only check when needed; protect secrets and unnecessary personal data. Label hypothetical examples and unobserved output.
+## 3. Frame consequential decisions
 
-### 4. Frame any decision
+First check whether context already resolves the choice. Ask about behavior, not task numbering or storage details. Describe concrete consequences and recommend a default with a reason. Resolve routine implementation choices yourself. Planning-only, no-writes, no-approval, and autonomous requests retain their boundaries; reporting adds no approval gate.
 
-Describe what happens in a real situation, using terms the user understands rather than storage details. Give each option a concrete consequence and recommend one with a reason. First check whether existing requirements already decide it.
+For example: should export contain all filtered matches (recommended, avoids silently omitting orders) or only the visible page (smaller, matches the current screen)? This is an unresolved requirements question, not confirmation of already agreed scope.
 
-For example: “Should export include all matching orders or only the visible page? I recommend all matches so downloading does not silently omit orders.” This is answerable without looking up a task identifier.
+**Optional Pi presentation:** if `ask_user_question` is exposed and structured presentation improves clarity, use its actual schema for two or more consequential alternatives. The installed tool supports 1–4 questions, 2–4 options each, concise labels (header at most 16 characters, option labels at most 60), and a description per option. Put the recommended option first with `(Recommended)`. Use `multiSelect` only for independent choices; no authored “Other”/“Type something.” row (the UI adds custom input). A single straightforward question stays conversational. If absent/unusable, ask plainly; never require/install the extension or call a guessed tool. Cancellation/default/timeout is not an accepted decision: preserve uncertainty rather than infer approval.
 
-Before sending or saving the question, check whether the reader must look up an identifier, understand a storage detail, or guess an option's consequence. Rephrase where needed. Reporting adds no approval gate.
+Representative options for “Which orders should export include?”: `All filtered matches (Recommended)` — exports every authorized match across pages; `Visible page only` — exports only rows shown now. Record the consequential accepted choice in the existing work record/receipt, not a separate list. The extension owns presentation/input only; JIG owns decision framing and write authority.
 
-### 5. Deliver the appropriate response
+Before sending/saving a question, ensure the reader need not look up an identifier or guess an option's effect. A simple missing target/name can be one plain question. Ask nothing for settled decisions.
 
-Apply the shared [context and workflow reminders](references/context.md) at relevant boundaries. If action is needed, include one concise next-skill or context recommendation with the reason, real checkpoint path, and paste-ready continuation. Distinguish compact from fresh context and use the actual host's command names; never suggest `/clean` as context cleanup. Do not remind the user to perform closeout already completed, introduce extra workflow stages, repeat an unchanged reminder, or pause authorized work just to demand a skill mention.
+## 4. Deliver and finish
 
-Lead with the observable outcome or blocker:
+Lead with the observable outcome or blocker, then meaningful checks, limitations, and the exact next action if any. Link only useful files, including the current record/receipt path at completion or handoff. Handoffs include recipient and pending worker/process ownership.
 
-- **Progress:** what changed, what remains uncertain, and the next action.
-- **Completion:** delivered behavior, meaningful checks, and limitations.
-- **Handoff:** selected record, pending action, and any worker/process ownership needed to resume.
-- **Context/model transition:** checkpoint and what actually happened, or the manual action still needed; name the model only when confirmed.
+Apply [context reminders](references/context.md) at meaningful boundaries; load its transition reference only when a transition is warranted. A recommendation includes why now, the actual checkpoint path and paste-ready resume prompt. Distinguish compact from fresh; never suggest `/clean` for context cleanup, repeat unchanged reminders, or demand closeout already finished.
 
-Link the few files needed to inspect the claim, including the current receipt/work-record path at completion or handoff. Under an enclosing implementation task, keep durable decisions and evidence in the existing record and receipt without finalizing ongoing execution prematurely. Before a final response, save and read back owned memory, checking that the reported state matches it. A delivered standalone report completes its observation session only; flag stale work states without repairing them unless requested. Disclose failed or prohibited memory writes rather than implying the report was persisted. Avoid duplicating the record or pasting a transcript into the response.
+Before the final response, finalize and read back owned memory per the contract. A delivered report completes only its observation session, not feature work. For an eligible ephemeral/no-writes request there is no receipt to finalize: disclose the omission. Unsaved writes are a limitation, never claim persistence. Do not duplicate the record or paste transcripts into chat.

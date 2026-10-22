@@ -16,7 +16,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SRC_DIR="$SCRIPT_DIR/skills"
 
 show_help() {
-  echo -e "${BOLD}Skill Uninstaller for Claude Code & Codex${NC}"
+  echo -e "${BOLD}Skill Uninstaller for Pi, Claude Code & Codex${NC}"
   echo "Easily remove installed repository skills locally or globally."
   echo
   echo -e "${BOLD}Usage:${NC}"
@@ -73,7 +73,7 @@ done
 
 # If no target specified, run interactive mode
 if [ "$LOCAL" = false ] && [ "$GLOBAL" = false ]; then
-  echo -e "${BLUE}=== Skill Uninstaller for Claude Code & Codex ===${NC}"
+  echo -e "${BLUE}=== Skill Uninstaller for Pi, Claude Code & Codex ===${NC}"
   echo "Where would you like to uninstall the skills from?"
   echo "1) Uninstall locally from the current project"
   echo "2) Uninstall globally"
@@ -164,9 +164,9 @@ if [ "$LOCAL" = true ]; then
       uninstall_skill "$skill" "$CLAUDE_LOCAL"
     done
     
-    # Codex local path
+    # Shared portable Pi/Codex local path
     CODEX_LOCAL="$ABS_LOCAL_PATH/.agents/skills"
-    echo -e "${YELLOW}Uninstalling from Codex (.agents/skills/)...${NC}"
+    echo -e "${YELLOW}Uninstalling from Pi and Codex (.agents/skills/)...${NC}"
     for skill in "${SKILLS[@]}"; do
       uninstall_skill "$skill" "$CODEX_LOCAL"
     done
@@ -187,9 +187,9 @@ if [ "$GLOBAL" = true ]; then
     uninstall_skill "$skill" "$CLAUDE_GLOBAL"
   done
   
-  # Codex global path
+  # Shared portable Pi/Codex global path
   CODEX_GLOBAL="$HOME/.agents/skills"
-  echo -e "${YELLOW}Uninstalling from Codex (~/.agents/skills/)...${NC}"
+  echo -e "${YELLOW}Uninstalling from Pi and Codex (~/.agents/skills/)...${NC}"
   for skill in "${SKILLS[@]}"; do
     uninstall_skill "$skill" "$CODEX_GLOBAL"
   done

@@ -1,0 +1,346 @@
+{
+  "started": "2026-10-22T12:42:47.477475+00:00",
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "thinking": "low",
+  "baseline": "daee4a3",
+  "pi_version": "1.2.0",
+  "runs": [
+    {
+      "tool_calls": {
+        "read": 10,
+        "bash": 2,
+        "write": 1,
+        "edit": 1
+      },
+      "usage": {
+        "input": 12918,
+        "output": 1194,
+        "cacheRead": 43904,
+        "cacheWrite": 0,
+        "totalTokens": 58016
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "**Reporting complete; feature completion is recorded, not newly verified.**\n\n- `docs/changes/archive/greeting.md` marks the greeting work complete, with both cases implemented and no remaining work.\n- Current `app.py` matches `docs/specs/greeting.md`: names are trimmed; empty or whitespace-only input falls back to `\"world\"`.\n- `tests/test_app.py` covers `\" Ada \"` \u2192 `\"Hello, Ada!\"` and whitespace-only input \u2192 `\"Hello, world!\"`.\n- The archive records a passing `python3 -m unittest discover -s tests -v` run, but supplies no dated log or revision. No tests were rerun.\n\nSource and work records were unchanged. Observation receipt: `.memory/sessions/20261022T124312Z-feedback.md`.",
+      "case": "recorded",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 60.43,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 0,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 12918,
+        "output": 1194,
+        "cacheRead": 43904,
+        "cacheWrite": 0,
+        "totalTokens": 58016
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 9,
+        "bash": 1
+      },
+      "usage": {
+        "input": 8010,
+        "output": 571,
+        "cacheRead": 22144,
+        "cacheWrite": 0,
+        "totalTokens": 30725
+      },
+      "receipt_read_calls": 0,
+      "finalized_receipt_readback": false,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "**The greeting change is archived as complete**, and current code matches its recorded scope.\n\n- **Behavior:** `app.py` trims names and falls back to `world` for empty or whitespace-only input.\n- **Coverage:** `tests/test_app.py` covers `\" Ada \"` \u2192 `\"Hello, Ada!\"` and whitespace-only input \u2192 `\"Hello, world!\"`.\n- **Recorded verification:** `docs/changes/archive/greeting.md` reports that `python3 -m unittest discover -s tests -v` passed. No checks were rerun, as requested.\n- **Documentation:** `docs/specs/greeting.md` agrees with the implementation; the archive lists no remaining work.\n\nReporting is complete; feature completion is the archive\u2019s recorded status, supported by current code inspection\u2014not fresh test execution. No source or work records changed.\n\nEphemeral observation; no receipt saved.",
+      "case": "ephemeral",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 28.28,
+      "independent_checks_passed": true,
+      "receipt_count": 0,
+      "receipt_finalized": false,
+      "receipt_next_cleared": false,
+      "changed_observed_sources": [],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 0,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 8010,
+        "output": 571,
+        "cacheRead": 22144,
+        "cacheWrite": 0,
+        "totalTokens": 30725
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 9,
+        "bash": 1
+      },
+      "usage": {
+        "input": 14552,
+        "output": 609,
+        "cacheRead": 15488,
+        "cacheWrite": 0,
+        "totalTokens": 30649
+      },
+      "receipt_read_calls": 0,
+      "finalized_receipt_readback": false,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "**The archived greeting change is recorded as complete, and current code matches its scope.**\n\n- **Scope:** Trim names and use `world` for empty or whitespace-only input, as specified in `docs/specs/greeting.md`.\n- **Implementation:** `app.py` uses `name.strip() or \"world\"` to produce the greeting.\n- **Evidence:** `tests/test_app.py` covers a padded name and whitespace-only input. `docs/changes/archive/greeting.md` records the required unittest command as passed, with all tasks complete and no next action.\n- **Verification limit:** No new checks were run, as requested. The recorded pass is historical evidence, not a fresh test result.\n\nThis reporting request is complete; it does not newly verify or change feature completion. No source, work records, or receipts were written. No receipt saved under your explicit no-writes instruction.",
+      "case": "no-writes",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 33.68,
+      "independent_checks_passed": true,
+      "receipt_count": 0,
+      "receipt_finalized": false,
+      "receipt_next_cleared": false,
+      "changed_observed_sources": [],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 0,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 14552,
+        "output": 609,
+        "cacheRead": 15488,
+        "cacheWrite": 0,
+        "totalTokens": 30649
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 11,
+        "bash": 2,
+        "write": 1,
+        "edit": 1
+      },
+      "usage": {
+        "input": 8603,
+        "output": 1195,
+        "cacheRead": 53632,
+        "cacheWrite": 0,
+        "totalTokens": 63430
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "**Report complete; feature completion is not supported.**\n\n- `docs/changes/archive/greeting.md` marks the work complete, but records the required unittest command as **FAILED: `test_blank`**.\n- Current `app.py` trims names but lacks the fallback required by `docs/specs/greeting.md`. By inspection, whitespace-only input produces `\"Hello, !\"` rather than `\"Hello, world!\"`.\n- `tests/test_app.py` covers both named and whitespace-only inputs.\n\nNo new checks were run, and no source or work records were changed. Remaining feature work is to add the fallback, run the required tests, and reconcile the archive\u2019s completion claim.\n\nThe discrepancy required promotion from ephemeral feedback to a recorded observation: `.memory/sessions/20261022T124522Z-greeting-feedback.md`.",
+      "case": "promoted",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 60.94,
+      "independent_checks_passed": false,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 0,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 8603,
+        "output": 1195,
+        "cacheRead": 53632,
+        "cacheWrite": 0,
+        "totalTokens": 63430
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 11,
+        "bash": 3,
+        "write": 1,
+        "edit": 4
+      },
+      "usage": {
+        "input": 24936,
+        "output": 1845,
+        "cacheRead": 96512,
+        "cacheWrite": 0,
+        "totalTokens": 123293
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "Implemented and closed out.\n\n- `app.py`: uses `\"world\"` when the trimmed name is empty; named greetings remain trimmed.\n- `tests/test_app.py`: covers empty strings, spaces, tabs/newlines, and the existing named greeting.\n- Verification: `python3 -m unittest discover -s tests -v` \u2014 **all 2 tests passed**.\n\nNested `jig-feedback` reused the enclosing receipt and owner. No delegation occurred.\n\nReceipt: `.memory/sessions/20261022T124612Z-greet.md`",
+      "case": "nested",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 96.09,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 0,
+      "required_check_calls": 2,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 24936,
+        "output": 1845,
+        "cacheRead": 96512,
+        "cacheWrite": 0,
+        "totalTokens": 123293
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 12,
+        "bash": 2,
+        "write": 2,
+        "task": 1
+      },
+      "usage": {
+        "input": 15524,
+        "output": 1615,
+        "cacheRead": 99072,
+        "cacheWrite": 0,
+        "totalTokens": 116211
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 1,
+      "model_errors": [],
+      "final": "Implemented and closed out.\n\n- `app.py`: empty or whitespace-only names now return `Hello, world!`; named greetings remain trimmed.\n- `tests/test_app.py`: covers empty strings, spaces, tabs/newlines, mixed whitespace, and `\" Ada \"`.\n\nDelegated the app/tests slice to `general` with `background: false`. The worker reported blank-input regressions failing before the fix and passing afterward. I inspected the actual edits and independently ran:\n\n```text\npython3 -m unittest discover -s tests -v\nRan 2 tests \u2014 OK\n```\n\nSole receipt: `.memory/sessions/20260225-greet.md`. No remaining work.",
+      "case": "worker",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 125.5,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 0,
+      "required_check_calls": 1,
+      "spec_reconciled": false,
+      "child_transcript_count": 1,
+      "child_usage": {
+        "input": 14682,
+        "output": 926,
+        "cacheRead": 32896,
+        "cacheWrite": 0,
+        "totalTokens": 48504
+      },
+      "child_models": [
+        "openai/gpt-6.1-sol"
+      ],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 30206,
+        "output": 2541,
+        "cacheRead": 131968,
+        "cacheWrite": 0,
+        "totalTokens": 164715
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 2,
+        "task": 1
+      },
+      "usage": {
+        "input": 7374,
+        "output": 606,
+        "cacheRead": 6016,
+        "cacheWrite": 0,
+        "totalTokens": 13996
+      },
+      "receipt_read_calls": 0,
+      "finalized_receipt_readback": false,
+      "successful_task_results": 1,
+      "model_errors": [],
+      "final": "- **Medium \u2014 `snapshot/scripts/evaluate-pi.py:331\u2013333`: Evaluation can accept false completion.** The `promoted` fixture combines a completed work record with a failing required check and broken current code, but acceptance checks only receipt creation/finalization/readback, unchanged sources, and absence of a new test invocation. An agent can therefore report the feature complete without acknowledging the contradiction and still pass. Require the report and receipt to preserve the failed-check discrepancy and avoid claiming verified completion. Add a negative regression case pairing a finalized receipt with a false-completion report.",
+      "case": "review",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 71.21,
+      "independent_checks_passed": true,
+      "receipt_count": 0,
+      "receipt_finalized": false,
+      "receipt_next_cleared": false,
+      "changed_observed_sources": [],
+      "unauthorized_changes": [],
+      "archive_count": 0,
+      "required_check_calls": 0,
+      "spec_reconciled": false,
+      "child_transcript_count": 1,
+      "child_usage": {
+        "input": 44415,
+        "output": 752,
+        "cacheRead": 119808,
+        "cacheWrite": 0,
+        "totalTokens": 164975
+      },
+      "child_models": [
+        "openai/gpt-6.1-sol"
+      ],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 51789,
+        "output": 1358,
+        "cacheRead": 125824,
+        "cacheWrite": 0,
+        "totalTokens": 178971
+      },
+      "accepted": true
+    }
+  ]
+}

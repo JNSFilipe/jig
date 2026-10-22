@@ -101,6 +101,32 @@ class InstallationTests(unittest.TestCase):
         for parent in self.skill_parents():
             self.assertEqual({p.name for p in parent.iterdir()}, SKILLS)
 
+    def test_pi_portable_discovery_metadata_and_no_duplicate_tree(self):
+        output = self.run_script("install.sh", "--local", self.project)
+        self.assertIn("Installing for Pi and Codex (.agents/skills/)", output)
+        self.assertIn("/skill:jig-apply in Pi", output)
+        for script in ("install.sh", "uninstall.sh"):
+            self.assertIn("Pi, Claude Code & Codex", self.run_script(script, "--help"))
+        portable = self.project / ".agents/skills"
+        self.assertFalse((self.project / ".pi").exists())
+        for name in SKILLS:
+            with self.subTest(skill=name):
+                text = (portable / name / "SKILL.md").read_text()
+                self.assertTrue(text.startswith("---\n"))
+                self.assertIn(f"\nname: {name}\n", text)
+                self.assertRegex(text, r"\ndescription: .+\n")
+                self.assertRegex(name, r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+                self.assertLessEqual(len(name), 64)
+                # Every progressive shared reference is bundled in a standalone copy.
+                for source in (ROOT / "skills/_shared").glob("*.md"):
+                    self.assertEqual((portable / name / "references" / source.name).read_bytes(),
+                                     source.read_bytes())
+        readme = (ROOT / "README.md").read_text()
+        for example in ("/skill:jig-apply", "/skill:jig-plan", "/skill:jig-status",
+                        "./install.sh --global", "./install.sh --local /path/to/project",
+                        "enableSkillCommands", "~/.agents/skills/", ".agents/skills/"):
+            self.assertIn(example, readme)
+
     def test_bad_arguments_fail_before_writing(self):
         for script in ("install.sh", "uninstall.sh"):
             for args in (("--unknown",),):

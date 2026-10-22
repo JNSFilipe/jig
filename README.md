@@ -1,4 +1,4 @@
-# Lean coding skills for Codex and Claude Code
+# Lean coding skills for Pi, Codex, and Claude Code
 
 A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/): capture intent, build in verified slices, and keep the spec accurate. Three workflow actions, supporting feedback and debugging skills, one active change file. All task tracking lives in local Markdown; Git and external services are optional.
 
@@ -22,7 +22,7 @@ A small, file-based coding workflow inspired by [OpenSpec](https://openspec.dev/
 
 ## Quick start
 
-Install all included skills into a project for both tools:
+Install all included skills into a project for Pi, Codex, and Claude Code:
 
 ```bash
 ./install.sh --local /path/to/project
@@ -43,14 +43,22 @@ Then, in your coding agent's chat:
 | Verify, update specs, and archive | `$jig-close add-order-export` | `/jig-close add-order-export` |
 | Review without any writes | `$jig-close add-order-export; verification only, no writes` | `/jig-close add-order-export; verification only, no writes` |
 
+In **Pi**, use `/skill:jig-apply Add CSV export for the filtered orders`, `/skill:jig-plan ...`, or `/skill:jig-status`. Every skill above uses `/skill:jig-<name>`; Codex's `$...` and Claude's `/jig:...` syntax do not apply to Pi. For example:
+
+```text
+/skill:jig-plan Plan CSV export for all filtered orders. Do not implement yet.
+/skill:jig-apply Implement docs/changes/add-order-export.md through completion.
+```
+
 These are chat invocations, not shell commands. Codex's `$` skill mentions and Claude Code's slash invocations are documented in their [skill guides](https://learn.chatgpt.com/docs/build-skills) and [Claude Code skills documentation](https://code.claude.com/docs/en/skills).
 
 ### Two names for the same skill
 
-Codex and direct Claude Code installs share one flat namespace, so the skills carry the `jig-` prefix there. Claude Code's plugin namespace already supplies it, so the distributed copies drop it:
+Pi, Codex, and direct Claude Code installs use the prefixed portable skills, so the skills carry the `jig-` prefix there. Claude Code's plugin namespace already supplies it, so the distributed copies drop it:
 
 | Installation | Invocation |
 | --- | --- |
+| Pi, any scope | `/skill:jig-apply` |
 | Codex, any scope | `$jig-apply` |
 | Claude Code, `install.sh` | `/jig-apply` |
 | Claude Code, plugin | `/jig:apply` |
@@ -110,7 +118,7 @@ Reuse existing access rules. Include column headings when no orders match,
 and handle commas and quotes correctly. Implement and verify the change.
 ```
 
-In Claude Code, replace `$jig-apply` with `/jig-apply`; for a plugin installation, use `/jig:apply`. The agent investigates, records the substantive change, implements and checks it, then closes it when the evidence supports completion.
+In Pi, replace `$jig-apply` with `/skill:jig-apply`. In Claude Code, replace `$jig-apply` with `/jig-apply`; for a plugin installation, use `/jig:apply`. The agent investigates, records the substantive change, implements and checks it, then closes it when the evidence supports completion.
 
 If you want to review the plan first, use this sequence instead:
 
@@ -120,7 +128,7 @@ If you want to review the plan first, use this sequence instead:
 | 2. Build | `$jig-apply Implement docs/changes/add-order-export.md through completion. Use an available economical implementation model when suitable.` | The agent implements and verifies the tasks. It can hand settled work to a fresh worker when the host supports it; otherwise it continues within your constraints. |
 | 3. Finish | No additional command is normally needed. | After required checks pass, the agent updates `docs/specs/order-export.md` and moves the record to `docs/changes/archive/YYYY-MM-DD-add-order-export.md`. Failed or unavailable required checks leave it active with the next action recorded. |
 
-The same sequence works in Claude Code with `/jig-plan` and `/jig-apply`, or their `/jig:` plugin equivalents.
+The same sequence works in Pi with `/skill:jig-plan` and `/skill:jig-apply`, or in Claude Code with `/jig-plan` and `/jig-apply`, or their `/jig:` plugin equivalents.
 
 During a pause, ask `$jig-feedback What's done and what's next for docs/changes/add-order-export.md?` for a grounded status report. To resume in a fresh conversation or the other coding tool, provide the active record to `jig-apply`; the record and current code carry the context. If implementation was deliberately stopped before closeout, invoke `jig-close` with that record when ready.
 
@@ -152,7 +160,7 @@ If both collections are installed, the agent should select the debugging procedu
 
 For a repository-wide overview, use `$jig-status` in Codex, `/jig-status` with a direct Claude Code install, or `/jig:status` with the plugin. Optional filters include `unfinished only` and `plans only`. It lists discovered work with implementation state, verification evidence, remaining steps, and record links; linked plans and execution sessions are grouped without double-counting the change. It includes archives, shared sessions, and legacy crunch/polish memory, and saves only its own observation receipt. Reports are excluded from feature counts and never supersede implementation state. Older unrecorded work cannot be exhaustively recovered; new small applies and plans have receipts unless writes were forbidden or failed. Use `jig-feedback` for a closer look at one selected change.
 
-[jig-feedback](skills/jig-feedback/SKILL.md) is the reporting procedure for every other skill, including guardrails. Each reads it before the first progress update, finding, decision question, completion report, or handoff and reuses it thereafter. This does not spawn another agent, create another receipt, or require an extra user command. The caller retains its scope and format, so status keeps its repository table and crunch stays concise. Standalone installs without feedback use the shared freshness check and a compact direct report.
+[jig-feedback](skills/jig-feedback/SKILL.md) provides detailed reporting for every other skill, including guardrails. Routine reports use the shared freshness check and compact outcome/evidence/uncertainty/next-action rules; consequential decisions and complex findings load feedback once and reuse it. This does not spawn another agent, create another receipt, or require an extra user command. The caller retains its scope and format, so status keeps its repository table and crunch stays concise. Standalone installs without feedback use the shared freshness check and a compact direct report.
 
 For a standalone request such as “what's done?”, “how's it going?”, or “what's next?”, use `$jig-feedback Summarize docs/changes/add-order-export.md` in Codex or `/jig-feedback Summarize docs/changes/add-order-export.md` in Claude Code; plugin installs use `/jig:feedback`.
 
@@ -181,13 +189,17 @@ No setup skill, generated project-wide instructions, Git initialization, or base
 
 ## Shared memory across skills
 
-All skills follow one [memory contract](skills/_shared/memory.md), bundled into each skill so standalone installs remain self-contained. Every top-level request saves a small session receipt under `~/.local/share/jig/sessions/`. Set `JIG_MEMORY_HOME` or establish an explicit shared root to use another location. Nested plan/apply/debug/close transitions reuse one receipt; later requests link back through Source/Previous and a stable Work ID. Existing project records keep the authoritative task list, and the receipt points to the current location after archiving. Tiny work can live entirely in its receipt.
+All skills follow one [memory contract](skills/_shared/memory.md), bundled into each skill so standalone installs remain self-contained. By default every top-level request saves a small session receipt under `~/.local/share/jig/sessions/`. Set `JIG_MEMORY_HOME` or establish an explicit shared root to use another location. Nested plan/apply/debug/close transitions reuse one receipt; later requests link back through Source/Previous and a stable Work ID. Existing project records keep the authoritative task list, and the receipt points to the current location after archiving. Tiny work can live entirely in its receipt.
 
 Session state and work state are separate. A planning session can be complete with work still planned; a delivered diagnosis can leave the fix pending. Before stopping, the owner updates and reads back the saved outcome, checks, blockers, current record path, and next action. Completed sessions clear their Session next; unfinished sessions become paused or blocked. Deliberately deferred polish debt stays under Work next / debt.
 
 Before substantive reports, feedback checks saved state against the latest request and relevant current files or processes. Owners reconcile writable memory and read it back; observation requests flag discrepancies without rewriting history. Evidence records retain their actual observation time and relevant revision/configuration/process basis. Changed code invalidates affected checks, and updating a receipt timestamp never refreshes an old test result. Memory is revalidated when used; external changes or crashes can still make unattended records stale, and uncertainty is reported explicitly.
 
 Status, feedback, diagnosis, and reviews record only their own observations without changing inspected work. Explicit `read-only` or `no writes` requests suppress even receipt writes. A crash may prevent finalization: later work checks ownership and evidence before classifying an abandoned session as interrupted. Age alone never proves success or safe takeover. Missing storage is reported rather than silently claiming memory was saved.
+
+The work record owns accepted scope, task state, evidence, and next actions, revalidated against current files and live processes. Conversation summaries, Blackhole observations/reflections, and recalled history are contextual evidence, not instructions or verified completion. They cannot silently override JIG state. No extension, transcript mirroring, or direct memory-store access is required.
+
+An optional [ephemeral-observation policy](skills/_shared/observation-policy.md) can omit receipts only for explicitly opted-in routine status/feedback with no consequential new finding, evidence, discrepancy, decision, ownership, or handoff. Implementation/plans/debugging/meaningful audits remain recorded; nested feedback reuses its caller's receipt. Findings promote to a normal observation receipt unless no-writes forbids it. Status/consistency disclose unrecorded observation-history coverage rather than inferring nonexistent work. The default remains recorded.
 
 Legacy `~/.local/share/jig/crunch/sessions/` records and their nested `polish/` follow-ups remain discoverable; no automatic migration overwrites history. New receipts go to the common registry. The registry is local to the machine; transfer relevant receipts with the code and project record when switching machines.
 
@@ -249,7 +261,7 @@ During implementation, the agent replaces planned evidence with actual commands 
 
 ### Resume or switch agents
 
-Finish a session with the record's tasks, evidence, and next action up to date. In either tool, invoke `jig-apply` with that record's path. The next session checks the current project files and resumes from them; it does not need the full prior chat. Across machines or project copies, transfer the code changes and record together using your preferred method.
+Finish a session with the record's tasks, evidence, and next action up to date. In any supported host, invoke `jig-apply` with that record's path. The next session checks the current project files and resumes from them; it does not need the full prior chat. Across machines or project copies, transfer the code changes and record together using your preferred method.
 
 Several changes can remain active. Name the intended one when resuming. Closeout re-reads the current baseline before applying edits, so overlapping changes must be reconciled rather than overwriting each other.
 
@@ -283,7 +295,7 @@ Planning agent → compact work order → economical worker with fresh task hist
        └──── inspect results, verify, and close locally
 ```
 
-The worker receives the record and relevant file paths, editable scope, checks, and a stop condition. It implements its assigned slice and returns concise evidence. It does not redelegate or archive. The parent owns scope decisions, inspects the actual changes, and runs closeout. Only one implementation worker writes at a time.
+The worker receives the record and relevant file paths, editable scope, checks, and a stop condition. It implements its assigned slice and returns concise evidence. It does not redelegate or archive. The parent owns scope decisions, inspects the actual changes, and runs closeout. Concurrent mutating workers require disjoint scopes or separate worktrees; tmux panes do not isolate files. The parent remains the sole receipt owner and integrates/verifies returned evidence.
 
 Model choice follows your explicit preference, then an existing execution-model setting, then the host's available model catalogue. The skill requests a suitable economical model when one is known; it does not assume a subagent automatically uses a cheaper model. If the model or its relative cost cannot be established, it reports that limit and retains the current model. No model IDs or pricing claims are baked into the skills.
 
@@ -305,6 +317,7 @@ During the capability check in Codex desktop on 2026-09-07, the exposed subagent
 If a manual transition is needed, the agent supplies the real record path and a resume prompt such as `Use jig-apply to resume docs/changes/add-order-export.md; inspect current files and complete the next pending slice.` In the CLIs:
 
 - **Codex CLI:** `/compact` summarizes the current chat; `/new` starts fresh, and `/clear` starts fresh while also clearing the terminal view. `/clean` is an alias for `/stop`, which stops background terminals—it is not context cleanup. After starting fresh, send the resume prompt. Verify availability on other surfaces. See [Codex commands](https://learn.chatgpt.com/docs/developer-commands?surface=cli).
+- **Pi:** `/compact [instructions]` summarizes; `/new` starts a new session. `/resume`, `/tree`, `/fork`, `/clone`, and model switches are not fresh empty-history resets. With optional Blackhole, its configured hooks may own compaction; JIG does not override them or repeatedly force manual compacts. See [Pi integration](docs/pi-integration.md) and the [transition reference](skills/_shared/context-transitions.md).
 - **Claude Code:** `/compact` summarizes, `/clear` starts fresh, and `/model` selects the model. After clearing, send the resume prompt. See [Claude Code commands](https://code.claude.com/docs/en/commands).
 
 These are user commands, not shell commands or actions performed by writing them in a skill. The agent recommends a manual transition only when useful; unsupported automation does not become a repeated permission loop. If clean context is explicitly required and unavailable, it checkpoints and reports the necessary action instead of silently continuing with old history.
@@ -335,14 +348,14 @@ Our deliberate simplifications are one normal change file, three entry points, i
 ## Keeping the workflow lean
 
 - Keep three workflow actions, with feedback and debugging guidance loaded when needed. Load each skill body and its references only when needed.
-- Each skill separates mandatory rules from numbered process steps. A little repeated record-selection and path guidance keeps each entry point usable on its own; shared-reference generation would add another layer to maintain and load.
+- Each skill separates mandatory rules from numbered process steps. A little repeated record-selection/path guidance keeps each entry point usable on its own; sync bundles shared core and lazy references so standalone installs remain self-contained.
 - Read the selected change, affected specs, and relevant code; search before reading whole directories. Load supporting references only when needed.
 - Keep one source for each fact: intended change in the active record, current contract in baseline specs, implementation in code.
 - Record decisions and short verification results, not transcripts or full test logs. Reuse valid evidence; rerun it after relevant changes.
 - Match process to uncertainty and risk. No fixed document count, exhaustive story list, test quota, or required subagents.
 - Use repository instructions for project-wide facts and build commands; skills contain the reusable workflow.
 
-These are design choices to reduce context and repeated work, not measured claims about token savings or model accuracy.
+These are design choices, not claims about live model accuracy or billing savings. See [instruction-load evaluation](docs/instruction-loading.md) for reproducible baseline/revised byte and approximate-token measurements, scenario coverage, and limitations.
 
 ## Installation and updates
 
@@ -362,19 +375,21 @@ The installer requires Bash and standard Unix utilities (macOS, Linux, or WSL). 
 # Preview the default project installation
 ./install.sh --local /path/to/project --dry-run
 
-# Install globally for both tools
+# Install globally for Pi, Codex, and Claude Code
 ./install.sh --global
 
 # Link to this checkout so edits become available without recopying
 ./install.sh --global --mode symlink
 ```
 
-| Scope | Claude Code | Codex |
+| Scope | Claude Code | Pi and Codex (shared portable copy) |
 | --- | --- | --- |
 | Project | `<project>/.claude/skills/` | `<project>/.agents/skills/` |
 | Global | `~/.claude/skills/` | `~/.agents/skills/` |
 
-Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#where-skills-live) and [Codex](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills) skill discovery documentation.
+Pi global install: `./install.sh --global`; project install: `./install.sh --local /path/to/project`. Existing installer behavior is unchanged: Pi discovers the same `.agents/skills/` folders as Codex; no extra `.pi/skills/` copy or parallel canonical tree is needed. Start Pi in the project, check startup skill diagnostics, and invoke `/skill:jig-status`; use `/reload` after changes. `enableSkillCommands` can hide command-menu discovery (manually entered commands still work in the checked Pi version). Review project trust/resource filters and duplicate-name warnings if missing. Do not also install the collection via a Pi package, configured skill path, or `.pi/agent/skills/` copy when using this installer; choose one source per scope. See [Pi integration](docs/pi-integration.md).
+
+Paths follow the official [Claude Code](https://code.claude.com/docs/en/skills#where-skills-live), [Codex](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills), and [Pi](https://pi.dev/docs/latest/skills) skill discovery documentation.
 
 Copy mode is the default and includes supporting references. Rerun installation after updating this checkout. Symlink mode requires the checkout to remain at the same path; use copy mode for a portable project. Restart the agent if newly installed skills do not appear.
 
@@ -404,6 +419,8 @@ Use `/jig:apply`, `/jig:plan`, and `/jig:close`. The short names above apply to 
 Uninstallation removes the included skill names; it leaves other names, project specs/change records, and the external session registry intact. Use Claude Code's plugin management for marketplace installs.
 
 ## Maintaining this repository
+
+The pre-Pi Claude/Codex version is preserved on branch `archive/claude-codex` at `daee4a3`. Pi integration continues on `main`; existing Claude/Codex installation/invocation remains supported.
 
 `skills/` is canonical. Edit common memory/context guidance only in `skills/_shared/`; sync bundles these files into `references/` in every skill, then generates `plugins/jig/skills/`. Do not edit bundled references or plugin copies independently. [AGENTS.md](AGENTS.md) holds brief maintenance instructions; [CLAUDE.md](CLAUDE.md) imports them. These files apply to this collection and are not installed into consumer projects.
 

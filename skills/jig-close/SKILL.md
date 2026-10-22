@@ -11,7 +11,7 @@ Read and follow [the shared memory contract](references/memory.md) before starti
 
 ## Rules
 
-For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports use the shared freshness check and give outcome, evidence, uncertainty, next action, and record path. Read `jig-feedback/SKILL.md` for consequential decisions or complex findings and reuse it; if unavailable, report directly. Keep this skill's scope and memory owner, without another receipt or approval gate.
 
 - **Review-only means no work edits.** Report findings without changing code, specs, task state, or archive files. Only the review's observation receipt may be written, unless the user requires no writes at all.
 - **Completion requires evidence.** Incomplete scope, failing/unavailable required checks, and unresolved spec conflicts keep the change active.

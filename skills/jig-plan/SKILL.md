@@ -11,7 +11,7 @@ Read and follow [the shared memory contract](references/memory.md) before starti
 
 ## Rules
 
-For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports use the shared freshness check and give outcome, evidence, uncertainty, next action, and record path. Read `jig-feedback/SKILL.md` for consequential decisions or complex findings; reuse it without another receipt or approval gate. If unavailable, frame concrete consequences and report directly. Where Pi exposes `ask_user_question`, use its actual schema for consequential multi-option requirements (e.g. all filtered export matches versus visible page); otherwise ask conversationally. Simple questions stay plain, settled decisions need no question, and accepted consequential choices belong in the existing record. Preserve planning-only, no-writes, no-approval and autonomous implementation boundaries.
 
 - **Respect the request.** Planning-only work ends with the plan. A request that also includes implementation can continue without another approval gate.
 - **Keep intent explicit.** Resolve decisions that materially change behavior, compatibility, scope, or cost before treating the plan as executable.

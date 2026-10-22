@@ -37,8 +37,41 @@ class RepositoryTests(unittest.TestCase):
                 self.assertEqual((entrypoint.parent / "references/memory.md").read_bytes(), shared)
                 self.assertEqual((entrypoint.parent / "references/context.md").read_bytes(), context)
                 plugin = ROOT / "plugins/jig/skills" / entrypoint.parent.name.removeprefix("jig-")
-                self.assertEqual((plugin / "references/memory.md").read_bytes(), shared)
-                self.assertEqual((plugin / "references/context.md").read_bytes(), context)
+                for filename, canonical in (("memory.md", shared), ("context.md", context)):
+                    expected = canonical.decode()
+                    for sibling in (ROOT / "skills").glob("*/SKILL.md"):
+                        expected = expected.replace(sibling.parent.name,
+                                                    sibling.parent.name.removeprefix("jig-"))
+                    self.assertEqual((plugin / "references" / filename).read_text(), expected)
+
+    def test_all_progressive_shared_references_are_self_contained(self):
+        for source in (ROOT / "skills/_shared").rglob("*.md"):
+            relative = source.relative_to(ROOT / "skills/_shared")
+            for skill in (ROOT / "skills").glob("*/SKILL.md"):
+                with self.subTest(reference=str(relative), skill=skill.parent.name):
+                    self.assertEqual((skill.parent / "references" / relative).read_bytes(),
+                                     source.read_bytes())
+                    plugin = ROOT / "plugins/jig/skills" / skill.parent.name.removeprefix("jig-")
+                    expected = source.read_text()
+                    for sibling in (ROOT / "skills").glob("*/SKILL.md"):
+                        expected = expected.replace(sibling.parent.name,
+                                                    sibling.parent.name.removeprefix("jig-"))
+                    self.assertEqual((plugin / "references" / relative).read_text(), expected)
+
+    def test_relative_markdown_links_resolve_in_both_distributions(self):
+        paths = [ROOT / "README.md", *(ROOT / "docs").rglob("*.md"),
+                 *(ROOT / "skills").rglob("*.md"),
+                 *(ROOT / "plugins/jig/skills").rglob("*.md")]
+        for path in paths:
+            # Ignore code fences (e.g. Perl regexes containing ](...), not links.
+            prose = re.sub(r"(?m)^(`{3,}|~{3,})[^\n]*\n.*?^\1[^\n]*(?:\n|$)",
+                           "", path.read_text(), flags=re.S)
+            for link in re.findall(r"\]\(([^)]+)\)", prose):
+                target = link.split("#", 1)[0]
+                if not target or "://" in target:
+                    continue
+                with self.subTest(path=str(path.relative_to(ROOT)), link=link):
+                    self.assertTrue((path.parent / target).exists(), f"Broken link: {link}")
 
     def test_guardrails_routes_resolve_after_plugin_rewrite(self):
         for base, name, prefix in ((ROOT / "skills", "jig-guardrails", "jig-"),
@@ -108,7 +141,11 @@ class SyncTests(unittest.TestCase):
         for entrypoint in (self.root / "skills").glob("*/SKILL.md"):
             self.assertEqual((entrypoint.parent / "references/memory.md").read_bytes(), updated)
             plugin = self.root / "plugins/jig/skills" / entrypoint.parent.name.removeprefix("jig-")
-            self.assertEqual((plugin / "references/memory.md").read_bytes(), updated)
+            expected = updated.decode()
+            for sibling in (self.root / "skills").glob("*/SKILL.md"):
+                expected = expected.replace(sibling.parent.name,
+                                            sibling.parent.name.removeprefix("jig-"))
+            self.assertEqual((plugin / "references/memory.md").read_text(), expected)
         self.sync("--check")
 
     def test_shared_bundle_drift_is_detected_without_writes_and_repaired(self):

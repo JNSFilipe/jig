@@ -72,10 +72,11 @@ class RemoteProtocolTests(unittest.TestCase):
         self.helper = self.work / "protocol.sh"
         self.helper.write_text(
             'tmux() { command tmux -S "$JIG_REMOTE_SOCKET" "$@"; }\n'
-            + examples["sender"] + "\n" + examples["reader"] + "\n"
+            + examples["ownership-guard"] + "\n" + examples["sender"] + "\n" + examples["reader"] + "\n"
         )
         self.env.update(JIG_REMOTE_SOCKET=self.socket, JIG_REMOTE_PANE=self.pane,
-                        JIG_REMOTE_LOG=str(self.log))
+                        JIG_REMOTE_LOG=str(self.log), JIG_REMOTE_OWNER="jig-remote",
+                        JIG_REMOTE_IDLE_PANE=self.pane)
         self.wait_for(lambda: "TEST>" in self.tmux("capture-pane", "-p", "-t", self.pane))
 
     def stop_server(self):
@@ -157,6 +158,30 @@ class RemoteProtocolTests(unittest.TestCase):
                           "bash", "--noprofile", "--norc", "-i").strip()
         self.assertEqual(self.run_command("printf 'correct-pane'"), "correct-pane")
         self.assertNotIn("correct-pane", self.tmux("capture-pane", "-p", "-t", other))
+
+    def test_occupied_agent_pane_and_unknown_owner_reject_input(self):
+        # A fixture TUI, not a real Pi session: any injected input is visibly echoed.
+        agent = self.tmux("new-window", "-P", "-F", "#{pane_id}", "-t", "protocol",
+                          "bash", "--noprofile", "--norc", "-c",
+                          "printf 'PI AGENT BUSY\\n'; while IFS= read -r line; do "
+                          "printf 'INJECTED:%s\\n' \"$line\"; done").strip()
+        self.wait_for(lambda: "PI AGENT BUSY" in self.tmux("capture-pane", "-p", "-t", agent))
+        before = self.tmux("capture-pane", "-p", "-t", agent)
+        for owner in ("pi-task", "unknown", ""):
+            with self.subTest(owner=owner):
+                result = self.shell("jig_remote_send", CMD="touch injected-file",
+                                    JIG_REMOTE_PANE=agent, JIG_REMOTE_OWNER=owner,
+                                    JIG_REMOTE_IDLE_PANE=agent)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("Refusing input", result.stderr)
+                self.assertEqual(self.tmux("capture-pane", "-p", "-t", agent), before)
+        # A stale idle attestation for another pane also rejects input.
+        result = self.shell("jig_remote_send", CMD="touch injected-file",
+                            JIG_REMOTE_PANE=agent, JIG_REMOTE_OWNER="jig-remote")
+        self.assertEqual(result.returncode, 2)
+        self.assertFalse((self.work / "injected-file").exists())
+        self.assertEqual(self.run_command("printf 'owned-shell-still-works'"),
+                         "owned-shell-still-works")
 
     def test_pipe_flags_toggle_or_replace(self):
         self.tmux("pipe-pane", "-t", self.pane)  # close the task-owned setup pipe

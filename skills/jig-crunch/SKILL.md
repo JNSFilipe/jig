@@ -11,7 +11,7 @@ Read and follow [the shared memory contract](references/memory.md) before starti
 
 ## Execution
 
-For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope, brevity, and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports use the shared freshness check and give outcome, evidence, uncertainty, next action, and record path. Read `jig-feedback/SKILL.md` only for consequential decisions or complex findings and reuse it; if unavailable, report directly. Preserve crunch's scope, brevity, and memory owner; no extra receipt or approval gate.
 
 - Read project instructions, inspect local edits, and locate the nearest existing implementation and its callers. Search narrowly; expand only when evidence requires it. Reuse context and batch independent reads with bounded output.
 - Settle routine choices yourself. Ask only when missing information materially changes the requested behavior or authority. Keep any plan to a few lines; create no separate planning, design, spec, or archive documents unless the user or project requires them. Use the session record below for continuity.

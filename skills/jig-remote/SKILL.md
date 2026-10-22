@@ -11,7 +11,7 @@ Read and follow [the shared memory contract](references/memory.md) before starti
 
 ## Rules
 
-For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports apply the shared freshness check and report outcome, evidence, uncertainty, next action, and record path. Read `jig-feedback/SKILL.md` for consequential decisions or complex findings and reuse it; if unavailable, report directly. Keep this skill's scope and memory owner, without another receipt or approval gate.
 
 - **Keep commands reviewable.** State the target and intended operation. Apply host execution permissions to both transport and payload; tmux grants no additional authority and must not bypass a rejected command.
 - **Pin ownership to a pane.** Inspect before sending and use its stable pane ID, never whichever pane is active. One writer at a time; a session name alone verifies neither host nor readiness.
@@ -25,6 +25,8 @@ For progress, findings, decision questions, completion, and handoffs, read `jig-
 ### 1. Choose the simplest transport
 
 Use the ordinary command tool for local commands and one-shot SSH checks. Use a pane when the user wants to watch/intervene, work needs an interactive terminal, or a named session should be reused. Native persistent terminals also work when shared tmux visibility is unnecessary.
+
+Route delegated coding-agent work through Pi's exposed `task` tool, authorized SSH/interactive shell work through this skill, and one-shot commands through ordinary tools. A pi-task-owned pane hosts an agent, not a reusable command shell: never inject shell commands or readiness probes there. Reuse requires deliberate recorded ownership transfer, the previous owner relinquishing the pane, observation of an idle compatible shell, and a successful readiness round trip. Unknown ownership is rejection, not permission. Use independent task-owned socket/session names; never repurpose a worker session merely because it is visible.
 
 Prefer the user's authenticated session. Otherwise reuse a verified idle session for the target or create a descriptive one such as cmd-pi. Preserve named sessions and existing configuration. Read [the session protocol](references/session-protocol.md) before creating or driving a pane.
 

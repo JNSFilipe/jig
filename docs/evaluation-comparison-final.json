@@ -1,0 +1,202 @@
+{
+  "started": "2026-10-22T12:33:04.503325+00:00",
+  "provider": "openai",
+  "model": "gpt-6.1-sol",
+  "thinking": "low",
+  "baseline": "daee4a3",
+  "pi_version": "1.2.0",
+  "runs": [
+    {
+      "tool_calls": {
+        "read": 9,
+        "bash": 4,
+        "write": 1,
+        "edit": 3
+      },
+      "usage": {
+        "input": 23785,
+        "output": 1328,
+        "cacheRead": 95488,
+        "cacheWrite": 0,
+        "totalTokens": 120601
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "Fixed `app.py`: `greet` now returns `Hello, world!` for whitespace-only or empty names while preserving trimmed greetings such as `Hello, Ada!`.\n\nExpanded regression coverage in `tests/test_app.py` for spaces, tabs, newlines, and empty input.\n\nVerification: `python3 -m unittest discover -s tests -v` \u2014 all tests passed.\n\nCompleted locally without delegation using the explicit JIG installation. Receipt: `.memory/sessions/20261022T123329Z-greet.md`.",
+      "case": "tiny",
+      "revision": "baseline",
+      "exit_code": 0,
+      "elapsed_seconds": 70.29,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 0,
+      "required_check_calls": 2,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 23785,
+        "output": 1328,
+        "cacheRead": 95488,
+        "cacheWrite": 0,
+        "totalTokens": 120601
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 9,
+        "bash": 4,
+        "write": 2,
+        "edit": 2
+      },
+      "usage": {
+        "input": 12800,
+        "output": 1340,
+        "cacheRead": 92032,
+        "cacheWrite": 0,
+        "totalTokens": 106172
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "Fixed `greet` in `app.py` to use `\"world\"` when the trimmed name is empty, while preserving trimmed named greetings.\n\nExpanded `tests/test_app.py` to cover empty strings, spaces, tabs, and newlines.\n\nVerification: `python3 -m unittest discover -s tests -v` \u2014 all tests passed.\n\nCompleted locally without delegation. Record: `.memory/sessions/20261022T123447Z-greet.md`.",
+      "case": "tiny",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 78.88,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 0,
+      "required_check_calls": 2,
+      "spec_reconciled": false,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 12800,
+        "output": 1340,
+        "cacheRead": 92032,
+        "cacheWrite": 0,
+        "totalTokens": 106172
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 14,
+        "bash": 4,
+        "write": 1,
+        "edit": 6
+      },
+      "usage": {
+        "input": 17370,
+        "output": 2720,
+        "cacheRead": 170880,
+        "cacheWrite": 0,
+        "totalTokens": 190970
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "Implemented `export_orders` in `app.py` with:\n- `id,status,name` header and standard CSV quoting.\n- Owner filtering and optional exact status matching, including `\"\"`.\n- All matching rows in input order, without pagination.\n- Header-only output for no matches and no input mutation.\n\n**Verification:** `python3 -m unittest discover -s tests -v` \u2014 all 10 tests passed, including the six supplied scenarios and four additional regression tests.\n\n**Closeout complete:**\n- Reconciled spec: `docs/specs/export.md`\n- Archived change: `docs/changes/archive/2026-10-22-export.md`\n- Session receipt: `.memory/sessions/20261022T123556Z-export.md`\n\nNo delegation, blockers, or deferred work.",
+      "case": "substantial",
+      "revision": "baseline",
+      "exit_code": 0,
+      "elapsed_seconds": 116.55,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 1,
+      "spec_reconciled": true,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 17370,
+        "output": 2720,
+        "cacheRead": 170880,
+        "cacheWrite": 0,
+        "totalTokens": 190970
+      },
+      "accepted": true
+    },
+    {
+      "tool_calls": {
+        "read": 14,
+        "bash": 4,
+        "write": 1,
+        "edit": 6
+      },
+      "usage": {
+        "input": 22635,
+        "output": 2655,
+        "cacheRead": 124032,
+        "cacheWrite": 0,
+        "totalTokens": 149322
+      },
+      "receipt_read_calls": 1,
+      "finalized_receipt_readback": true,
+      "successful_task_results": 0,
+      "model_errors": [],
+      "final": "Implemented `export_orders` in `app.py` with owner filtering, optional exact status matching, all matching rows in input order, header-only empty results, standard CSV quoting, and no input mutation.\n\nVerification: `python3 -m unittest discover -s tests -v` \u2014 **10 tests passed**, including all six supplied scenarios and added edge cases.\n\nCloseout complete:\n- Reconciled `docs/specs/export.md`\n- Archived the completed record to `docs/changes/archive/2026-10-22-export.md`\n\nNo remaining work or blockers.",
+      "case": "substantial",
+      "revision": "revised",
+      "exit_code": 0,
+      "elapsed_seconds": 119.01,
+      "independent_checks_passed": true,
+      "receipt_count": 1,
+      "receipt_finalized": true,
+      "receipt_next_cleared": true,
+      "changed_observed_sources": [
+        "app.py"
+      ],
+      "unauthorized_changes": [],
+      "archive_count": 1,
+      "required_check_calls": 1,
+      "spec_reconciled": true,
+      "child_transcript_count": 0,
+      "child_usage": {},
+      "child_models": [],
+      "child_errors": [],
+      "diagnostics": "",
+      "combined_usage": {
+        "input": 22635,
+        "output": 2655,
+        "cacheRead": 124032,
+        "cacheWrite": 0,
+        "totalTokens": 149322
+      },
+      "accepted": true
+    }
+  ]
+}

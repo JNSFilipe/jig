@@ -13,7 +13,7 @@ Apply this procedure when debugging becomes necessary during ordinary work; do n
 
 ## Rules
 
-For progress, findings, decision questions, completion, and handoffs, read `jig-feedback/SKILL.md` from the installed sibling skill before the first report and reuse it. Keep this skill's scope and memory owner. If unavailable, apply the shared memory pre-report freshness check and report the outcome, evidence, uncertainty, next action, and record path directly.
+For routine reports use the shared freshness check and give outcome, evidence, uncertainty, next action, and record path. Read `jig-feedback/SKILL.md` for consequential decisions or complex findings and reuse it; if unavailable, report directly. Keep this skill's scope and memory owner, without another receipt or approval gate.
 
 - **Investigate before correcting.** Ground a proposed fix in observed evidence. Distinguish a hypothesis, an experiment, a confirmed cause, and a mitigation.
 - **Keep experiments interpretable.** Change one relevant factor at a time where practical. Remove disproven experimental changes you introduced; preserve unrelated work.
